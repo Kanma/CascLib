@@ -5,16 +5,16 @@ ASSUME FS: NOTHING
 ; ---------------------------------------------------------------------------
 
 TMndxFindResult struc ; (sizeof=0x1C) ; XREF: GAME_OBJECT_03F7E848::sub_E94500_r
-szPathName      dd ?                    ; XREF: TMndxFindResult__SetPath+2D_w
+szSearchMask    dd ?                    ; XREF: TMndxFindResult__SetPath+2D_w
                                         ; TMndxFindResult__Constructor+4_w ...
-cchPathName     dd ?                    ; XREF: TMndxFindResult__SetPath:loc_1956E9A_w
+cchSearchMask   dd ?                    ; XREF: TMndxFindResult__SetPath:loc_1956E9A_w
                                         ; TMndxFindResult__Constructor+6_w ...
 field_8         dd ?                    ; XREF: TMndxFindResult__Constructor+9_w
-szFoundPathName dd ?                    ; XREF: TMndxFindResult__Constructor+C_w
+szFoundPath     dd ?                    ; XREF: TMndxFindResult__Constructor+C_w
                                         ; TFileNameDatabase__FindFileInDatabase+55_w
-cchFoundPathName dd ?                   ; XREF: TMndxFindResult__Constructor+F_w
+cchFoundPath    dd ?                    ; XREF: TMndxFindResult__Constructor+F_w
                                         ; TFileNameDatabase__FindFileInDatabase+5B_w
-MndxIndex       dd ?                    ; XREF: TMndxFindResult__Constructor+12_w
+FileNameIndex   dd ?                    ; XREF: TMndxFindResult__Constructor+12_w
                                         ; TFileNameDatabase__FindFileInDatabase+6B_w
 pStruct40       dd ?                    ; XREF: MAR_FILE__FindFileInDatabase+19_r
                                         ; TMndxFindResult__SetPath:loc_1956E8C_r ...
@@ -23,27 +23,27 @@ TMndxFindResult ends
 ; ---------------------------------------------------------------------------
 
 TRIPLET         struc ; (sizeof=0xC)
-BitIndex        dd ?                    ; XREF: TFileNameDatabase__sub_1957970+39_r
-NextKey         dd ?                    ; XREF: TFileNameDatabase__sub_1957970+8C_r
-                                        ; sub_1959B60:loc_1959B8F_r ...
-Distance        dd ?                    ; XREF: TFileNameDatabase__sub_1957970+3E_r
-                                        ; sub_1959B60:loc_1959BBE_r ...
+BitIndex        dd ?                    ; XREF: TFileNameDatabase__CheckNextPathFragment+39_r
+NextKey         dd ?                    ; XREF: TFileNameDatabase__CheckNextPathFragment+8C_r
+                                        ; TSparseArray__GetItemValue:loc_1959B8F_r ...
+Distance        dd ?                    ; XREF: TFileNameDatabase__CheckNextPathFragment+3E_r
+                                        ; TSparseArray__GetItemValue:loc_1959BBE_r ...
 TRIPLET         ends
 
 ; ---------------------------------------------------------------------------
 
-FRAGMENT_INFO   struc ; (sizeof=0xC)
+NAME_ENTRY   struc ; (sizeof=0xC)
 ExpectedHashModifier dd ?
 NextHashModifier dd ?                   ; XREF: TArchiveDatabase__sub_1958B00+D3r
                                         ; sub_1958D70+2Cr
 FragmentOffset  dd ?                    ; XREF: TArchiveDatabase__sub_1958B00+45r
                                         ; sub_1958D70+36r
-FRAGMENT_INFO   ends
+NAME_ENTRY   ends
 
 ; ---------------------------------------------------------------------------
 
 TStruct14       struc ; (sizeof=0x14)   ; XREF: TFileNameDatabase::sub_1959460r
-HashModifier    dd ?                    ; XREF: TGenericArray__InsertItem_STRUCT14+44r
+HashValue       dd ?                    ; XREF: TGenericArray__InsertItem_STRUCT14+44r
                                         ; TGenericArray__InsertItem_STRUCT14+46w ...
 field_4         dd ?                    ; XREF: TGenericArray__InsertItem_STRUCT14+48r
                                         ; TGenericArray__InsertItem_STRUCT14+4Bw ...
@@ -109,42 +109,42 @@ array_18        TGenericArray <>        ; XREF: TMndxFindResult__CreateStruct40+
                 db ? ; undefined
                 db ? ; undefined
                 db ? ; undefined
-HashModifier    dd ?                    ; XREF: TMndxFindResult__CreateStruct40+47w
-                                        ; TFileNameDatabase__sub_1957970+1Ar ...
+HashValue       dd ?                    ; XREF: TMndxFindResult__CreateStruct40+47w
+                                        ; TFileNameDatabase__CheckNextPathFragment+1Ar ...
 CharIndex       dd ?                    ; XREF: TMndxFindResult__CreateStruct40+4Aw
-                                        ; TFileNameDatabase__sub_1957970+11r ...
+                                        ; TFileNameDatabase__CheckNextPathFragment+11r ...
 ItemCount       dd ?                    ; XREF: TMndxFindResult__CreateStruct40+4Dw
-                                        ; sub_19586B0+6Bw ...
-field_3C        dd ?                    ; XREF: TMndxFindResult__CreateStruct40+50w
+                                        ; TStruct40__InitSearchBuffers+6Bw ...
+SearchPhase     dd ?                    ; XREF: TMndxFindResult__CreateStruct40+50w
                                         ; TFileNameDatabase__FindFileInDatabase+17w ...
 TStruct40       ends
 
 ; ---------------------------------------------------------------------------
 
-TStruct68       struc ; (sizeof=0x65)   ; XREF: TStruct68::LoadFromStream_Exchange_r
+TSparseArray    struc ; (sizeof=0x65)   ; XREF: TSparseArray::LoadFromStream_Exchange_r
                                         ; TNameIndexStruct_r ...
-BitArray_0      TGenericArray <>         ; XREF: LoadAndVerifyIndexFileHeader+31_w
+ItemIsPresent   TGenericArray <>        ; XREF: LoadAndVerifyIndexFileHeader+31_w
                                         ; TFileNameDatabase__Destructor+4C_r ...
                 db ? ; undefined
                 db ? ; undefined
                 db ? ; undefined
-field_18        dd ?                    ; XREF: TStruct68__ExchangeWith+4D_r
-                                        ; TStruct68__ExchangeWith+56_w ...
-field_1C        dd ?                    ; XREF: TFileNameDatabasePtr__GetStruct68_68_Field1C:loc_1956D32_r
-                                        ; TStruct68__ExchangeWith+59_r ...
-ArrayTriplets_20 TGenericArray <>        ; XREF: TFileNameDatabase__Destructor+40_r
+TotalItemCount  dd ?                    ; XREF: TSparseArray__ExchangeWith+4D_r
+                                        ; TSparseArray__ExchangeWith+56_w ...
+ValidItemCount  dd ?                    ; XREF: TFileNameDatabasePtr__GetFileNameCount:loc_1956D32_r
+                                        ; TSparseArray__ExchangeWith+59_r ...
+ArrayTriplets_20 TGenericArray <>       ; XREF: TFileNameDatabase__Destructor+40_r
                                         ; TFileNameDatabase__Destructor+94_r ...
                 db ? ; undefined
                 db ? ; undefined
                 db ? ; undefined
-ArrayDwords_38  TGenericArray <>         ; XREF: TFileNameDatabasePtr__CreateDatabase+27_o
+ArrayDwords_38  TGenericArray <>        ; XREF: TFileNameDatabasePtr__CreateDatabase+27_o
                                         ; TFileNameDatabase__Destructor+34_r ...
                 db ? ; undefined
                 db ? ; undefined
                 db ? ; undefined
-ArrayDwords_50  TGenericArray <>         ; XREF: TFileNameDatabase__Destructor+28_r
+ArrayDwords_50  TGenericArray <>        ; XREF: TFileNameDatabase__Destructor+28_r
                                         ; TFileNameDatabase__Destructor+7C_r ...
-TStruct68       ends
+TSparseArray    ends
 
 ; ---------------------------------------------------------------------------
 
@@ -155,7 +155,7 @@ NameFragments   TGenericArray <>        ; XREF: TFileNameDatabase__Destructor+58
                 db ? ; undefined
                 db ? ; undefined
                 db ? ; undefined
-Struct68        TStruct68 <>            ; XREF: LoadAndVerifyIndexFileHeader+31_w
+Struct68        TSparseArray <>         ; XREF: LoadAndVerifyIndexFileHeader+31_w
                                         ; TFileNameDatabase__Destructor+28_r ...
 TNameIndexStruct ends
 
@@ -201,47 +201,47 @@ TFileNameDatabasePtr ends
 ; ---------------------------------------------------------------------------
 
 TFileNameDatabase struc ; (sizeof=0x240) ; XREF: TFileNameDatabase::LoadFromStream_Exchange_r
-Struct68_00     TStruct68 <>             ; XREF: TFileNameDatabasePtr__CreateDatabase+27_o
+Struct68_00     TSparseArray <>         ; XREF: TFileNameDatabasePtr__CreateDatabase+27_o
                                         ; TFileNameDatabase__Destructor+D9_r ...
                 db ? ; undefined
                 db ? ; undefined
                 db ? ; undefined
-Struct68_68     TStruct68 <>             ; XREF: TFileNameDatabasePtr__GetStruct68_68_Field1C:loc_1956D32_r
+FileNameIndexes TSparseArray <>         ; XREF: TFileNameDatabasePtr__GetFileNameCount:loc_1956D32_r
                                         ; TFileNameDatabase__Destructor+AC_r ...
                 db ? ; undefined
                 db ? ; undefined
                 db ? ; undefined
-Struct68_D0     TStruct68 <>             ; XREF: TFileNameDatabase__Destructor+7C_r
+Struct68_D0     TSparseArray <>         ; XREF: TFileNameDatabase__Destructor+7C_r
                                         ; TFileNameDatabase__Destructor+88_r ...
                 db ? ; undefined
                 db ? ; undefined
                 db ? ; undefined
-bytes_138       TGenericArray <>         ; XREF: TFileNameDatabase__Destructor+70_r
-                                        ; TFileNameDatabase__sub_1957970:loc_1957AC9_r ...
+FrgmDist_LoBits TGenericArray <>        ; XREF: TFileNameDatabase__Destructor+70_r
+                                        ; TFileNameDatabase__CheckNextPathFragment:loc_1957AC9_r ...
                 db ? ; undefined
                 db ? ; undefined
                 db ? ; undefined
-BitEntries_150  TBitEntryArray <>       ; XREF: TFileNameDatabase__Destructor+64_r
-                                        ; TFileNameDatabase__sub_1957970+119_r ...
-IndexStruct_174 TNameIndexStruct <>      ; XREF: TFileNameDatabase__Destructor+28_r
+FrgmDist_HiBits TBitEntryArray <>       ; XREF: TFileNameDatabase__Destructor+64_r
+                                        ; TFileNameDatabase__CheckNextPathFragment+119_r ...
+IndexStruct_174 TNameIndexStruct <>     ; XREF: TFileNameDatabase__Destructor+28_r
                                         ; TFileNameDatabase__Destructor+34_r ...
                 db ? ; undefined
                 db ? ; undefined
                 db ? ; undefined
-NextDB          TFileNameDatabasePtr <>   ; XREF: TFileNameDatabase__Destructor+1D_o
-                                        ; TFileNameDatabase__sub_1957970+52_r ...
-triplets_1F8    TGenericArray <>         ; XREF: TFileNameDatabase__Destructor+E_r
-                                        ; TFileNameDatabase__sub_1957970+2F_r ...
+NextDB          TFileNameDatabasePtr <> ; XREF: TFileNameDatabase__Destructor+1D_o
+                                        ; TFileNameDatabase__CheckNextPathFragment+52_r ...
+NameFragTable   TGenericArray <>        ; XREF: TFileNameDatabase__Destructor+E_r
+                                        ; TFileNameDatabase__CheckNextPathFragment+2F_r ...
                 db ? ; undefined
                 db ? ; undefined
                 db ? ; undefined
-dwKeyMask       dd ?                    ; XREF: TFileNameDatabase__sub_1957970+26_r
+NameFragIndexMask dd ?                  ; XREF: TFileNameDatabase__CheckNextPathFragment+26_r
                                         ; sub_1957B80:loc_1957B95_r ...
 field_214       dd ?                    ; XREF: TFileNameDatabase__Constructor+20E_w
                                         ; TFileNameDatabase__LoadFromStream+110_w
-Struct10        TStruct10 <>             ; XREF: TFileNameDatabase__Constructor+21A_w
+Struct10        TStruct10 <>            ; XREF: TFileNameDatabase__Constructor+21A_w
                                         ; TFileNameDatabase__Constructor+224_w ...
-MarStream       TByteStream <>           ; XREF: TFileNameDatabase__Destructor+3_o
+MarStream       TByteStream <>          ; XREF: TFileNameDatabase__Destructor+3_o
                                         ; TFileNameDatabase__Constructor+214_o
 TFileNameDatabase ends
 
@@ -367,8 +367,8 @@ operator_delete PROC
 operator_delete ENDP
 
 
-sub_1959B60     proc near               ; CODE XREF: sub_1957350+1A_p
-                                        ; TFileNameDatabase__sub_1957970+103_p ...
+TSparseArray__GetItemValue     proc near               ; CODE XREF: sub_1957350+1A_p
+                                        ; TFileNameDatabase__CheckNextPathFragment+103_p ...
 
 arg_0           = dword ptr  8
 
@@ -398,7 +398,7 @@ loc_1959B8F:                            ; DATA XREF: .text:off_1959C90o
                 jmp     short loc_1959BDE
 ; ---------------------------------------------------------------------------
 
-loc_1959B97:                            ; CODE XREF: sub_1959B60+28_j
+loc_1959B97:                            ; CODE XREF: TSparseArray__GetItemValue+28_j
                                         ; DATA XREF: .text:off_1959C90o
                 mov     edx, [eax+4] ; jumptable 01959B88 case 1
                 shr     edx, 7
@@ -407,7 +407,7 @@ loc_1959B97:                            ; CODE XREF: sub_1959B60+28_j
                 jmp     short loc_1959BE0 ; jumptable 01959B88 default case
 ; ---------------------------------------------------------------------------
 
-loc_1959BA7:                            ; CODE XREF: sub_1959B60+28_j
+loc_1959BA7:                            ; CODE XREF: TSparseArray__GetItemValue+28_j
                                         ; DATA XREF: .text:off_1959C90o
                 mov     eax, [eax+4] ; jumptable 01959B88 case 2
                 shr     eax, 0Fh
@@ -415,7 +415,7 @@ loc_1959BA7:                            ; CODE XREF: sub_1959B60+28_j
                 jmp     short loc_1959BDE
 ; ---------------------------------------------------------------------------
 
-loc_1959BB4:                            ; CODE XREF: sub_1959B60+28_j
+loc_1959BB4:                            ; CODE XREF: TSparseArray__GetItemValue+28_j
                                         ; DATA XREF: .text:off_1959C90o
                 mov     edx, [eax+4] ; jumptable 01959B88 case 3
                 shr     edx, 17h
@@ -423,13 +423,13 @@ loc_1959BB4:                            ; CODE XREF: sub_1959B60+28_j
                 jmp     short loc_1959BE0 ; jumptable 01959B88 default case
 ; ---------------------------------------------------------------------------
 
-loc_1959BBE:                            ; CODE XREF: sub_1959B60+28_j
+loc_1959BBE:                            ; CODE XREF: TSparseArray__GetItemValue+28_j
                                         ; DATA XREF: .text:off_1959C90o
                 mov     eax, [eax+8]    ; jumptable 01959B88 case 4
                 jmp     short loc_1959BD9
 ; ---------------------------------------------------------------------------
 
-loc_1959BC3:                            ; CODE XREF: sub_1959B60+28_j
+loc_1959BC3:                            ; CODE XREF: TSparseArray__GetItemValue+28_j
                                         ; DATA XREF: .text:off_1959C90o
                 mov     edx, [eax+8]    ; jumptable 01959B88 case 5
                 shr     edx, 9
@@ -438,20 +438,20 @@ loc_1959BC3:                            ; CODE XREF: sub_1959B60+28_j
                 jmp     short loc_1959BE0 ; jumptable 01959B88 default case
 ; ---------------------------------------------------------------------------
 
-loc_1959BD3:                            ; CODE XREF: sub_1959B60+28_j
+loc_1959BD3:                            ; CODE XREF: TSparseArray__GetItemValue+28_j
                                         ; DATA XREF: .text:off_1959C90o
                 mov     eax, [eax+8]    ; jumptable 01959B88 case 6
                 shr     eax, 12h
 
-loc_1959BD9:                            ; CODE XREF: sub_1959B60+61_j
+loc_1959BD9:                            ; CODE XREF: TSparseArray__GetItemValue+61_j
                 and     eax, 1FFh
 
-loc_1959BDE:                            ; CODE XREF: sub_1959B60+35_j
-                                        ; sub_1959B60+52_j
+loc_1959BDE:                            ; CODE XREF: TSparseArray__GetItemValue+35_j
+                                        ; TSparseArray__GetItemValue+52_j
                 add     esi, eax
 
-loc_1959BE0:                            ; CODE XREF: sub_1959B60+26_j
-                                        ; sub_1959B60+45_j ...
+loc_1959BE0:                            ; CODE XREF: TSparseArray__GetItemValue+26_j
+                                        ; TSparseArray__GetItemValue+45_j ...
                 mov     ebx, edi        ; jumptable 01959B88 default case
                 shr     ebx, 5
                 test    bl, 1
@@ -477,7 +477,7 @@ loc_1959BE0:                            ; CODE XREF: sub_1959B60+26_j
                 shr     eax, 18h
                 add     esi, eax
 
-loc_1959C31:                            ; CODE XREF: sub_1959B60+88_j
+loc_1959C31:                            ; CODE XREF: TSparseArray__GetItemValue+88_j
                 mov     edx, [ecx+8]
                 mov     ecx, edi
                 and     ecx, 1Fh
@@ -510,7 +510,7 @@ loc_1959C31:                            ; CODE XREF: sub_1959B60+88_j
                 pop     ebp
                 retn    4
 
-off_1959C90     dd offset loc_1959B8F   ; DATA XREF: sub_1959B60+28_r
+off_1959C90     dd offset loc_1959B8F   ; DATA XREF: TSparseArray__GetItemValue+28_r
                 dd offset loc_1959B97   ; jump table for switch statement
                 dd offset loc_1959BA7
                 dd offset loc_1959BB4
@@ -518,13 +518,13 @@ off_1959C90     dd offset loc_1959B8F   ; DATA XREF: sub_1959B60+28_r
                 dd offset loc_1959BC3
                 dd offset loc_1959BD3
 
-sub_1959B60     endp
+TSparseArray__GetItemValue     endp
 
 ;------------------------------------------------------------------------------
 ; TArchiveDatabase__sub_1959CB0
 
 TArchiveDatabase__sub_1959CB0 proc near
-                                        ; CODE XREF: TFileNameDatabase__sub_1957970+A1_p
+                                        ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+A1_p
                                         ; sub_1958B00+E8_p ...
 
 pThis           = dword ptr -4
@@ -808,8 +808,8 @@ TArchiveDatabase__sub_1959CB0 endp
 
 ; Attributes: bp-based frame
 
-TNameIndexStruct__CompareAndSkipNameFragment     proc near               ; CODE XREF: TFileNameDatabase__sub_1957970+6B_p
-                                        ; TFileNameDatabase__sub_1957970+191_p ...
+TNameIndexStruct__CheckNameFragment     proc near               ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+6B_p
+                                        ; TFileNameDatabase__CheckNextPathFragment+191_p ...
 
 pThis           = dword ptr -4
 pUnknownStruct1C= dword ptr  8
@@ -822,7 +822,7 @@ dwDistance      = dword ptr  0Ch
                 push    esi
                 push    edi
                 mov     edi, ecx
-                cmp     [edi+TNameIndexStruct.Struct68.field_18], 0
+                cmp     [edi+TNameIndexStruct.Struct68.TotalItemCount], 0
                 mov     ecx, [ebp+pUnknownStruct1C]
                 mov     edx, [ecx+TMndxFindResult.pStruct40]
                 mov     [ebp+pThis], edi
@@ -831,9 +831,9 @@ dwDistance      = dword ptr  0Ch
                 sub     edi, [edx+TStruct40.CharIndex]
                 add     edi, [ebp+dwDistance] ; EDI = szPathFragment
 
-loc_195A1A1:                            ; CODE XREF: TNameIndexStruct__CompareAndSkipNameFragment+3Bj
+loc_195A1A1:                            ; CODE XREF: TNameIndexStruct__CheckNameFragment+3Bj
                 mov     eax, [edx+TStruct40.CharIndex]
-                mov     esi, [ecx+TMndxFindResult.szPathName]
+                mov     esi, [ecx+TMndxFindResult.szSearchMask]
                 mov     bl, [eax+edi]
                 cmp     bl, [eax+esi]
                 jnz     short loc_195A1BD
@@ -841,11 +841,11 @@ loc_195A1A1:                            ; CODE XREF: TNameIndexStruct__CompareAn
                 mov     [edx+TStruct40.CharIndex], eax
                 cmp     byte ptr [eax+edi], 0
                 jz      short loc_195A215
-                cmp     eax, [ecx+TMndxFindResult.cchPathName]
+                cmp     eax, [ecx+TMndxFindResult.cchSearchMask]
                 jb      short loc_195A1A1
 
-loc_195A1BD:                            ; CODE XREF: TNameIndexStruct__CompareAndSkipNameFragment+2C_j
-                                        ; TNameIndexStruct__CompareAndSkipNameFragment+5Ej ...
+loc_195A1BD:                            ; CODE XREF: TNameIndexStruct__CheckNameFragment+2C_j
+                                        ; TNameIndexStruct__CheckNameFragment+5Ej ...
                 pop     edi
                 pop     esi
                 xor     al, al
@@ -855,23 +855,23 @@ loc_195A1BD:                            ; CODE XREF: TNameIndexStruct__CompareAn
                 retn    8
 ; ---------------------------------------------------------------------------
 
-loc_195A1C8:                            ; CODE XREF: TNameIndexStruct__CompareAndSkipNameFragment+16_j
+loc_195A1C8:                            ; CODE XREF: TNameIndexStruct__CheckNameFragment+16_j
                 mov     eax, [ebp+dwDistance]
                 jmp     short loc_195A1D0
 ; ---------------------------------------------------------------------------
                 align 10h
 
-loc_195A1D0:                            ; CODE XREF: TNameIndexStruct__CompareAndSkipNameFragment+4B_j
-                                        ; TNameIndexStruct__CompareAndSkipNameFragment+93j
+loc_195A1D0:                            ; CODE XREF: TNameIndexStruct__CheckNameFragment+4B_j
+                                        ; TNameIndexStruct__CheckNameFragment+93j
                 mov     ebx, [edi+TNameIndexStruct.NameFragments.ItemArray]
                 mov     esi, [edx+TStruct40.CharIndex]
-                mov     ecx, [ecx+TMndxFindResult.szPathName]
+                mov     ecx, [ecx+TMndxFindResult.szSearchMask]
                 mov     bl, [eax+ebx]   ; pNameList[dwNameOffset] == szPathName[nCharIndex]
                 cmp     bl, [esi+ecx]
                 jnz     short loc_195A1BD
                 lea     ecx, [esi+1]
                 mov     [edx+TStruct40.CharIndex], ecx
-                mov     edi, [edi+TNameIndexStruct.Struct68.BitArray_0.ItemArray]
+                mov     edi, [edi+TNameIndexStruct.Struct68.ItemIsPresent.ItemArray]
                 mov     [ebp+dwDistance], ecx
                 mov     ecx, eax
                 and     ecx, 1Fh        ; ecx = (dwNameOffset & 0x1F)
@@ -891,8 +891,8 @@ loc_195A1D0:                            ; CODE XREF: TNameIndexStruct__CompareAn
                 jmp     short loc_195A1D0
 ; ---------------------------------------------------------------------------
 
-loc_195A215:                            ; CODE XREF: TNameIndexStruct__CompareAndSkipNameFragment+36_j
-                                        ; TNameIndexStruct__CompareAndSkipNameFragment+83_j
+loc_195A215:                            ; CODE XREF: TNameIndexStruct__CheckNameFragment+36_j
+                                        ; TNameIndexStruct__CheckNameFragment+83_j
                 pop     edi
                 pop     esi
                 mov     al, 1
@@ -900,7 +900,7 @@ loc_195A215:                            ; CODE XREF: TNameIndexStruct__CompareAn
                 mov     esp, ebp
                 pop     ebp
                 retn    8
-TNameIndexStruct__CompareAndSkipNameFragment     endp
+TNameIndexStruct__CheckNameFragment     endp
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -922,7 +922,7 @@ arg_0           = dword ptr  8
                 push    eax
                 lea     ecx, [esi+0D0h]
                 add     ebx, eax
-                call    sub_1959B60
+                call    TSparseArray__GetItemValue
                 mov     edi, [esi+168h]
                 mov     ecx, edi
                 imul    ecx, eax
@@ -1222,8 +1222,8 @@ sub_1959F50     endp
 
 ; Attributes: bp-based frame
 
-sub_1957B80     proc near               ; CODE XREF: TFileNameDatabase__sub_1957970+5E_p
-                                        ; TFileNameDatabase__sub_1957970+180_p ...
+sub_1957B80     proc near               ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+5E_p
+                                        ; TFileNameDatabase__CheckNextPathFragment+180_p ...
 
 pStruct40       = dword ptr -4
 arg_0           = dword ptr  8
@@ -1243,10 +1243,10 @@ arg_4           = dword ptr  0Ch
 
 loc_1957B95:                            ; CODE XREF: sub_1957B80+9Fj
                                         ; sub_1957B80+156j
-                mov     eax, [esi+TFileNameDatabase.dwKeyMask]
+                mov     eax, [esi+TFileNameDatabase.NameFragIndexMask]
                 and     eax, edi
                 lea     ecx, [eax+eax*2]
-                mov     eax, [esi+TFileNameDatabase.triplets_1F8.ItemArray]
+                mov     eax, [esi+TFileNameDatabase.NameFragTable.ItemArray]
                 add     ecx, ecx
                 add     ecx, ecx
                 add     eax, ecx
@@ -1269,7 +1269,7 @@ loc_1957B95:                            ; CODE XREF: sub_1957B80+9Fj
 
 loc_1957BDA:                            ; CODE XREF: sub_1957B80+51_j
                 lea     ecx, [esi+TFileNameDatabase.IndexStruct_174]
-                call    TNameIndexStruct__CompareAndSkipNameFragment
+                call    TNameIndexStruct__CheckNameFragment
 
 loc_1957BE5:                            ; CODE XREF: sub_1957B80+58_j
                 test    al, al
@@ -1343,7 +1343,7 @@ loc_1957C73:                            ; CODE XREF: sub_1957B80+D6_j
 
 loc_1957C7D:                            ; CODE XREF: sub_1957B80+EA_j
                 lea     ecx, [esi+174h]
-                call    TNameIndexStruct__CompareAndSkipNameFragment
+                call    TNameIndexStruct__CheckNameFragment
 
 loc_1957C88:                            ; CODE XREF: sub_1957B80+F1_j
                 test    al, al
@@ -1404,7 +1404,7 @@ arg_4           = dword ptr  0Ch
                 mov     ebp, esp
                 push    esi
                 mov     esi, ecx
-                mov     edx, [esi+TFileNameDatabase.BitEntries_150.BitsPerEntry]
+                mov     edx, [esi+TFileNameDatabase.FrgmDist_HiBits.BitsPerEntry]
                 mov     eax, edx
                 imul    eax, [ebp+arg_4]
                 mov     ecx, eax
@@ -1412,7 +1412,7 @@ arg_4           = dword ptr  0Ch
                 add     edx, eax
                 shr     ecx, 5
                 cmp     edx, 20h
-                mov     edx, [esi+TFileNameDatabase.BitEntries_150.ItemArray]
+                mov     edx, [esi+TFileNameDatabase.FrgmDist_HiBits.ItemArray]
                 ja      short loc_1957400
                 mov     edx, [edx+ecx*4]
                 mov     ecx, eax
@@ -1434,8 +1434,8 @@ loc_1957400:                            ; CODE XREF: sub_19573D0+25j
                 pop     edi
 
 loc_1957419:                            ; CODE XREF: sub_19573D0+2Ej
-                and     edx, [esi+TFileNameDatabase.BitEntries_150.EntryBitMask]
-                mov     eax, [esi+TFileNameDatabase.bytes_138.ItemArray]
+                and     edx, [esi+TFileNameDatabase.FrgmDist_HiBits.EntryBitMask]
+                mov     eax, [esi+TFileNameDatabase.FrgmDist_LoBits.ItemArray]
                 mov     ecx, [ebp+arg_0]
                 movzx   eax, byte ptr [eax+ecx]
                 shl     edx, 8
@@ -1451,10 +1451,10 @@ sub_19573D0     endp
 
 ; Attributes: bp-based frame
 
-TFileNameDatabase__sub_1957970 proc near ; CODE XREF: TFileNameDatabase__FindFileInDatabase+25p
+TFileNameDatabase__CheckNextPathFragment proc near ; CODE XREF: TFileNameDatabase__FindFileInDatabase+25p
 
 var_C           = dword ptr -0Ch
-BitIndex        = dword ptr -8
+CollisionIndex  = dword ptr -8
 var_4           = dword ptr -4
 pStruct1C       = dword ptr  8
 
@@ -1463,21 +1463,21 @@ pStruct1C       = dword ptr  8
                 mov     edx, [ebp+pStruct1C]
                 sub     esp, 0Ch
                 push    ebx
-                mov     ebx, [edx+TMndxFindResult.szPathName]
+                mov     ebx, [edx+TMndxFindResult.szSearchMask]
                 push    esi
                 push    edi
                 mov     edi, [edx+TMndxFindResult.pStruct40]
                 mov     eax, [edi+TStruct40.CharIndex]
                 movzx   eax, byte ptr [eax+ebx] ; EAX = szPathName[nCharIndex]
                 mov     esi, ecx
-                mov     ecx, [edi+TStruct40.HashModifier]
+                mov     ecx, [edi+TStruct40.HashValue]
                 mov     ebx, ecx
                 shl     ebx, 5
                 xor     eax, ebx
                 xor     eax, ecx
-                and     eax, [esi+TFileNameDatabase.dwKeyMask] ; (000000ff) - Mask value
+                and     eax, [esi+TFileNameDatabase.NameFragIndexMask] ; (000000ff) - Mask value
                 lea     ebx, [eax+eax*2]
-                mov     eax, [esi+TFileNameDatabase.triplets_1F8.ItemArray] ; (7f3ae128) - Array of 256 triplets
+                mov     eax, [esi+TFileNameDatabase.NameFragTable.ItemArray] ; (7f3ae128) - Array of 256 triplets
                 add     ebx, ebx
                 add     ebx, ebx        ; EBX = Offset of the triplet we want to know
                 cmp     ecx, [eax+ebx+TRIPLET.BitIndex]
@@ -1496,16 +1496,16 @@ pStruct1C       = dword ptr  8
                 jmp     short loc_19579E0
 ; ---------------------------------------------------------------------------
 
-loc_19579D5:                            ; CODE XREF: TFileNameDatabase__sub_1957970+5C_j
+loc_19579D5:                            ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+5C_j
                 lea     ecx, [esi+TFileNameDatabase.IndexStruct_174]
-                call    TNameIndexStruct__CompareAndSkipNameFragment
+                call    TNameIndexStruct__CheckNameFragment
 
-loc_19579E0:                            ; CODE XREF: TFileNameDatabase__sub_1957970+63_j
+loc_19579E0:                            ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+63_j
                 test    al, al
                 jnz     short loc_19579F6
 
-loc_19579E4:                            ; CODE XREF: TFileNameDatabase__sub_1957970+C1j
-                                        ; TFileNameDatabase__sub_1957970+1A4j
+loc_19579E4:                            ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+C1j
+                                        ; TFileNameDatabase__CheckNextPathFragment+1A4j
                 pop     edi
                 pop     esi
                 xor     al, al
@@ -1515,17 +1515,17 @@ loc_19579E4:                            ; CODE XREF: TFileNameDatabase__sub_1957
                 retn    4
 ; ---------------------------------------------------------------------------
 
-loc_19579EF:                            ; CODE XREF: TFileNameDatabase__sub_1957970+50_j
+loc_19579EF:                            ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+50_j
                 mov     eax, [edi+TStruct40.CharIndex] ; nCharIndex = nCharIndex + 1
                 inc     eax
                 mov     [edi+TStruct40.CharIndex], eax
 
-loc_19579F6:                            ; CODE XREF: TFileNameDatabase__sub_1957970+72_j
-                mov     edx, [esi+TFileNameDatabase.triplets_1F8.ItemArray] ; EDX = pTripletArray
+loc_19579F6:                            ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+72_j
+                mov     edx, [esi+TFileNameDatabase.NameFragTable.ItemArray] ; EDX = pTripletArray
                 mov     eax, [edx+ebx+TRIPLET.NextKey]
-                mov     [edi+TStruct40.HashModifier], eax
+                mov     [edi+TStruct40.HashValue], eax
 
-loc_1957A03:                            ; CODE XREF: TFileNameDatabase__sub_1957970+198j
+loc_1957A03:                            ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+198j
                 pop     edi
                 pop     esi
                 mov     al, 1
@@ -1535,11 +1535,11 @@ loc_1957A03:                            ; CODE XREF: TFileNameDatabase__sub_1957
                 retn    4
 ; ---------------------------------------------------------------------------
 
-loc_1957A0E:                            ; CODE XREF: TFileNameDatabase__sub_1957970+3C_j
+loc_1957A0E:                            ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+3C_j
                 push    ecx             ; dwKey
                 mov     ecx, esi        ; pDatabase
                 call    TArchiveDatabase__sub_1959CB0
-                mov     ebx, [esi+TFileNameDatabase.Struct68_00.BitArray_0.ItemArray]
+                mov     ebx, [esi+TFileNameDatabase.Struct68_00.ItemIsPresent.ItemArray]
                 inc     eax
                 mov     ecx, eax
                 and     ecx, 1Fh
@@ -1547,17 +1547,17 @@ loc_1957A0E:                            ; CODE XREF: TFileNameDatabase__sub_1957
                 shl     edx, cl
                 mov     ecx, eax
                 shr     ecx, 5
-                mov     [ebp+BitIndex], eax
+                mov     [ebp+CollisionIndex], eax
                 test    [ebx+ecx*4], edx
                 jz      short loc_19579E4
-                sub     eax, [edi+TStruct40.HashModifier]
+                sub     eax, [edi+TStruct40.HashValue]
                 mov     [ebp+var_4], 0FFFFFFFFh
                 dec     eax
-                mov     [edi+TStruct40.HashModifier], eax
+                mov     [edi+TStruct40.HashValue], eax
 
-loc_1957A41:                            ; CODE XREF: TFileNameDatabase__sub_1957970+1E1j
-                mov     eax, [edi+TStruct40.HashModifier]
-                mov     ebx, [esi+TFileNameDatabase.Struct68_D0.BitArray_0.ItemArray]
+loc_1957A41:                            ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+1E1j
+                mov     eax, [edi+TStruct40.HashValue]
+                mov     ebx, [esi+TFileNameDatabase.Struct68_D0.ItemIsPresent.ItemArray]
                 mov     ecx, eax
                 and     ecx, 1Fh
                 mov     edx, 1
@@ -1571,20 +1571,20 @@ loc_1957A41:                            ; CODE XREF: TFileNameDatabase__sub_1957
                 jnz     short loc_1957A7F
                 push    eax
                 lea     ecx, [esi+TFileNameDatabase.Struct68_D0]
-                call    sub_1959B60
+                call    TSparseArray__GetItemValue
                 mov     ecx, eax
                 mov     [ebp+var_4], eax
                 jmp     short loc_1957A83
 ; ---------------------------------------------------------------------------
 
-loc_1957A7F:                            ; CODE XREF: TFileNameDatabase__sub_1957970+FA_j
+loc_1957A7F:                            ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+FA_j
                 inc     ecx
                 mov     [ebp+var_4], ecx
 
-loc_1957A83:                            ; CODE XREF: TFileNameDatabase__sub_1957970+10D_j
+loc_1957A83:                            ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+10D_j
                 mov     edx, [edi+TStruct40.CharIndex]
                 mov     [ebp+var_C], edx
-                mov     edx, [esi+TFileNameDatabase.BitEntries_150.BitsPerEntry]
+                mov     edx, [esi+TFileNameDatabase.FrgmDist_HiBits.BitsPerEntry]
                 mov     eax, edx
                 imul    eax, ecx
                 mov     ecx, eax
@@ -1592,7 +1592,7 @@ loc_1957A83:                            ; CODE XREF: TFileNameDatabase__sub_1957
                 add     edx, eax
                 shr     ecx, 5
                 cmp     edx, 20h
-                mov     edx, [esi+TFileNameDatabase.BitEntries_150.ItemArray]
+                mov     edx, [esi+TFileNameDatabase.FrgmDist_HiBits.ItemArray]
                 ja      short loc_1957AB2
                 mov     edx, [edx+ecx*4]
                 mov     ecx, eax
@@ -1600,7 +1600,7 @@ loc_1957A83:                            ; CODE XREF: TFileNameDatabase__sub_1957
                 jmp     short loc_1957AC9
 ; ---------------------------------------------------------------------------
 
-loc_1957AB2:                            ; CODE XREF: TFileNameDatabase__sub_1957970+137_j
+loc_1957AB2:                            ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+137_j
                 lea     ebx, [edx+ecx*4]
                 mov     edx, [ebx+4]
                 mov     ebx, [ebx]
@@ -1611,10 +1611,10 @@ loc_1957AB2:                            ; CODE XREF: TFileNameDatabase__sub_1957
                 shr     ebx, cl
                 or      edx, ebx
 
-loc_1957AC9:                            ; CODE XREF: TFileNameDatabase__sub_1957970+140_j
-                mov     ecx, [esi+TFileNameDatabase.bytes_138.ItemArray]
-                and     edx, [esi+TFileNameDatabase.BitEntries_150.EntryBitMask]
-                mov     eax, [edi+TStruct40.HashModifier]
+loc_1957AC9:                            ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+140_j
+                mov     ecx, [esi+TFileNameDatabase.FrgmDist_LoBits.ItemArray]
+                and     edx, [esi+TFileNameDatabase.FrgmDist_HiBits.EntryBitMask]
+                mov     eax, [edi+TStruct40.HashValue]
                 movzx   eax, byte ptr [ecx+eax]
                 mov     ecx, [esi+TFileNameDatabase.NextDB.pDatabase]
                 shl     edx, 8
@@ -1628,13 +1628,13 @@ loc_1957AC9:                            ; CODE XREF: TFileNameDatabase__sub_1957
                 jmp     short loc_1957B06
 ; ---------------------------------------------------------------------------
 
-loc_1957AF7:                            ; CODE XREF: TFileNameDatabase__sub_1957970+17A_j
+loc_1957AF7:                            ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+17A_j
                 mov     eax, [ebp+pStruct1C]
                 push    eax
                 lea     ecx, [esi+TFileNameDatabase.IndexStruct_174]
-                call    TNameIndexStruct__CompareAndSkipNameFragment
+                call    TNameIndexStruct__CheckNameFragment
 
-loc_1957B06:                            ; CODE XREF: TFileNameDatabase__sub_1957970+185_j
+loc_1957B06:                            ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+185_j
                 test    al, al
                 jnz     loc_1957A03
                 mov     ecx, [ebp+var_C]
@@ -1643,25 +1643,25 @@ loc_1957B06:                            ; CODE XREF: TFileNameDatabase__sub_1957
                 jmp     short loc_1957B32
 ; ---------------------------------------------------------------------------
 
-loc_1957B1C:                            ; CODE XREF: TFileNameDatabase__sub_1957970+EE_j
-                mov     edx, [esi+TFileNameDatabase.bytes_138.ItemArray]
+loc_1957B1C:                            ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+EE_j
+                mov     edx, [esi+TFileNameDatabase.FrgmDist_LoBits.ItemArray]
                 mov     ebx, [ebp+pStruct1C]
                 mov     ecx, [edi+TStruct40.CharIndex]
-                mov     ebx, [ebx+TMndxFindResult.szPathName]
+                mov     ebx, [ebx+TMndxFindResult.szSearchMask]
                 mov     dl, [eax+edx]
                 cmp     dl, [ecx+ebx]
                 jz      short loc_1957B62
 
-loc_1957B32:                            ; CODE XREF: TFileNameDatabase__sub_1957970+1AA_j
-                mov     eax, [ebp+BitIndex]
-                inc     [edi+TStruct40.HashModifier]
+loc_1957B32:                            ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+1AA_j
+                mov     eax, [ebp+CollisionIndex]
+                inc     [edi+TStruct40.HashValue]
                 inc     eax
                 mov     ecx, eax
                 and     ecx, 1Fh
                 mov     edx, 1
                 shl     edx, cl
-                mov     ecx, [esi+TFileNameDatabase.Struct68_00.BitArray_0.ItemArray]
-                mov     [ebp+BitIndex], eax
+                mov     ecx, [esi+TFileNameDatabase.Struct68_00.ItemIsPresent.ItemArray]
+                mov     [ebp+CollisionIndex], eax
                 shr     eax, 5
                 test    [ecx+eax*4], edx
                 jnz     loc_1957A41
@@ -1674,7 +1674,7 @@ loc_1957B32:                            ; CODE XREF: TFileNameDatabase__sub_1957
                 retn    4
 ; ---------------------------------------------------------------------------
 
-loc_1957B62:                            ; CODE XREF: TFileNameDatabase__sub_1957970+1C0_j
+loc_1957B62:                            ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+1C0_j
                 mov     eax, 1
                 add     [edi+TStruct40.CharIndex], eax
                 pop     edi
@@ -1683,7 +1683,7 @@ loc_1957B62:                            ; CODE XREF: TFileNameDatabase__sub_1957
                 mov     esp, ebp
                 pop     ebp
                 retn    4
-TFileNameDatabase__sub_1957970 endp
+TFileNameDatabase__CheckNextPathFragment endp
 
 
 TFileNameDatabase__FindFileInDatabase proc near
@@ -1702,26 +1702,26 @@ pStruct1C       = dword ptr  8
                 push    edi
                 mov     edi, [esi+TMndxFindResult.pStruct40]
                 mov     ebx, ecx
-                mov     [edi+TStruct40.HashModifier], eax
+                mov     [edi+TStruct40.HashValue], eax
                 mov     [edi+TStruct40.CharIndex], eax
-                mov     [edi+TStruct40.field_3C], eax
+                mov     [edi+TStruct40.SearchPhase], eax
                 mov     [ebp+pThis], ebx
-                cmp     [esi+TMndxFindResult.cchPathName], eax
+                cmp     [esi+TMndxFindResult.cchSearchMask], eax
                 jbe     short loc_1957F26
 
 label_process_all_characters:           ; CODE XREF: TFileNameDatabase__FindFileInDatabase+34j
                 push    esi
                 mov     ecx, ebx
-                call    TFileNameDatabase__sub_1957970
+                call    TFileNameDatabase__CheckNextPathFragment
                 test    al, al
                 jz      short label_return_false
                 mov     eax, [edi+TStruct40.CharIndex]
-                cmp     eax, [esi+TMndxFindResult.cchPathName]
+                cmp     eax, [esi+TMndxFindResult.cchSearchMask]
                 jb      short label_process_all_characters
 
 loc_1957F26:                            ; CODE XREF: TFileNameDatabase__FindFileInDatabase+20_j
-                mov     ecx, [edi+TStruct40.HashModifier]
-                mov     eax, [ebx+TFileNameDatabase.Struct68_68.BitArray_0.ItemArray]
+                mov     ecx, [edi+TStruct40.HashValue]
+                mov     eax, [ebx+TFileNameDatabase.FileNameIndexes.ItemIsPresent.ItemArray]
                 mov     edx, ecx
                 and     ecx, 1Fh
                 mov     ebx, 1
@@ -1729,17 +1729,17 @@ loc_1957F26:                            ; CODE XREF: TFileNameDatabase__FindFile
                 shr     edx, 5
                 test    [eax+edx*4], ebx
                 jz      short label_return_false
-                mov     ecx, [esi+TMndxFindResult.szPathName]
-                mov     eax, [esi+TMndxFindResult.cchPathName]
-                mov     [esi+TMndxFindResult.szFoundPathName], ecx
+                mov     ecx, [esi+TMndxFindResult.szSearchMask]
+                mov     eax, [esi+TMndxFindResult.cchSearchMask]
+                mov     [esi+TMndxFindResult.szFoundPath], ecx
                 mov     ecx, [ebp+pThis]
-                mov     [esi+TMndxFindResult.cchFoundPathName], eax
-                mov     edi, [edi+TStruct40.HashModifier]
+                mov     [esi+TMndxFindResult.cchFoundPath], eax
+                mov     edi, [edi+TStruct40.HashValue]
                 push    edi
-                add     ecx, TFileNameDatabase.Struct68_68
-                call    sub_1959B60
+                add     ecx, TFileNameDatabase.FileNameIndexes
+                call    TSparseArray__GetItemValue
                 pop     edi
-                mov     [esi+TMndxFindResult.MndxIndex], eax
+                mov     [esi+TMndxFindResult.FileNameIndex], eax
                 pop     esi
                 mov     al, 1
                 pop     ebx
@@ -1765,7 +1765,7 @@ TFileNameDatabase__FindFileInDatabase endp
 ; Attributes: bp-based frame
 
 TGenericArray__SetMaxItems_BYTE proc near ; CODE XREF: sub_19582E0+2Cp
-                                        ; sub_19586B0+2Cp ...
+                                        ; TStruct40__InitSearchBuffers+2Cp ...
 
 ByteCount       = dword ptr  8
 
@@ -1894,7 +1894,7 @@ TGenericArray__SetMaxItems_STRUCT14 endp
 
 ; Attributes: bp-based frame
 
-TGenericArray__sub_19583A0 proc near    ; CODE XREF: sub_19586B0+35p
+TGenericArray__sub_19583A0 proc near    ; CODE XREF: TStruct40__InitSearchBuffers+35p
 
 NewItemCount    = dword ptr  8
 
@@ -1962,7 +1962,7 @@ TGenericArray__sub_19583A0 endp
 ; =============== S U B R O U T I N E =======================================
 
 
-sub_19586B0     proc near               ; CODE XREF: TFileNameDatabase__sub_1959460+2Bp
+TStruct40__InitSearchBuffers     proc near               ; CODE XREF: TFileNameDatabase__sub_1959460+2Bp
                 push    ebx
                 push    esi
                 mov     esi, ecx
@@ -1981,16 +1981,16 @@ sub_19586B0     proc near               ; CODE XREF: TFileNameDatabase__sub_1959
                 jmp     short loc_19586D9
 ; ---------------------------------------------------------------------------
 
-loc_19586D6:                            ; CODE XREF: sub_19586B0+1Fj
+loc_19586D6:                            ; CODE XREF: TStruct40__InitSearchBuffers+1Fj
                 lea     ecx, [eax+eax]
 
-loc_19586D9:                            ; CODE XREF: sub_19586B0+18j
-                                        ; sub_19586B0+24j
+loc_19586D9:                            ; CODE XREF: TStruct40__InitSearchBuffers+18j
+                                        ; TStruct40__InitSearchBuffers+24j
                 push    ecx
                 mov     ecx, esi
                 call    TGenericArray__SetMaxItems_BYTE
 
-loc_19586E1:                            ; CODE XREF: sub_19586B0+10j
+loc_19586E1:                            ; CODE XREF: TStruct40__InitSearchBuffers+10j
                 push    ebx
                 lea     ecx, [esi+TStruct40.array_18]
                 call    TGenericArray__sub_19583A0
@@ -2005,22 +2005,22 @@ loc_19586E1:                            ; CODE XREF: sub_19586B0+10j
                 ja      short loc_195870B
                 lea     ecx, [eax+eax]
 
-loc_195870B:                            ; CODE XREF: sub_19586B0+4Aj
-                                        ; sub_19586B0+56j
+loc_195870B:                            ; CODE XREF: TStruct40__InitSearchBuffers+4Aj
+                                        ; TStruct40__InitSearchBuffers+56j
                 push    ecx
                 lea     ecx, [esi+TStruct40.array_18]
                 call    TGenericArray__SetMaxItems_STRUCT14
 
-loc_1958714:                            ; CODE XREF: sub_19586B0+40j
+loc_1958714:                            ; CODE XREF: TStruct40__InitSearchBuffers+40j
                 pop     edi
-                mov     [esi+TStruct40.HashModifier], ebx
+                mov     [esi+TStruct40.HashValue], ebx
                 mov     [esi+TStruct40.CharIndex], ebx
                 mov     [esi+TStruct40.ItemCount], ebx
-                mov     [esi+TStruct40.field_3C], 2
+                mov     [esi+TStruct40.SearchPhase], 2
                 pop     esi
                 pop     ebx
                 retn
-sub_19586B0     endp
+TStruct40__InitSearchBuffers     endp
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -2063,8 +2063,8 @@ loc_1958361:                            ; CODE XREF: TGenericArray__InsertItem_S
                 test    eax, eax
                 jz      short loc_1958390
                 mov     ecx, [ebp+pStruct14]
-                mov     edx, [ecx+TStruct14.HashModifier]
-                mov     [eax+TStruct14.HashModifier], edx
+                mov     edx, [ecx+TStruct14.HashValue]
+                mov     [eax+TStruct14.HashValue], edx
                 mov     edx, [ecx+TStruct14.field_4]
                 mov     [eax+TStruct14.field_4], edx
                 mov     edx, [ecx+TStruct14.field_8]
@@ -2098,7 +2098,7 @@ dwDistance      = dword ptr  0Ch
                 mov     eax, [ebp+pStruct1C]
                 push    ebx
                 mov     ebx, ecx
-                cmp     [ebx+TNameIndexStruct.Struct68.field_18], 0
+                cmp     [ebx+TNameIndexStruct.Struct68.TotalItemCount], 0
                 push    esi
                 mov     esi, [eax+TMndxFindResult.pStruct40]
                 push    edi
@@ -2261,7 +2261,7 @@ loc_195A538:                            ; CODE XREF: CopyNameFragment+142j
                 and     ecx, 1Fh
                 mov     edx, 1
                 shl     edx, cl
-                mov     ecx, [ebx+TNameIndexStruct.Struct68.BitArray_0.ItemArray]
+                mov     ecx, [ebx+TNameIndexStruct.Struct68.ItemIsPresent.ItemArray]
                 mov     eax, edi
                 shr     eax, 5
                 and     edx, [ecx+eax*4]
@@ -2305,10 +2305,10 @@ arg_4           = dword ptr  0Ch
 
 loc_1958D84:                            ; CODE XREF: sub_1958D70+10Fj
                                         ; sub_1958D70+28Fj
-                mov     eax, [edi+TFileNameDatabase.dwKeyMask]
+                mov     eax, [edi+TFileNameDatabase.NameFragIndexMask]
                 and     eax, ecx
                 lea     ebx, [eax+eax*2]
-                mov     eax, [edi+TFileNameDatabase.triplets_1F8.ItemArray]
+                mov     eax, [edi+TFileNameDatabase.NameFragTable.ItemArray]
                 add     ebx, ebx
                 add     ebx, ebx
                 mov     [ebp+var_C], ebx
@@ -2407,7 +2407,7 @@ loc_1958E6E:                            ; CODE XREF: sub_1958D70+F7j
 
 loc_1958E71:                            ; CODE XREF: sub_1958D70+5Ej
                                         ; sub_1958D70+72j
-                mov     edx, [edi+TFileNameDatabase.triplets_1F8.ItemArray]
+                mov     edx, [edi+TFileNameDatabase.NameFragTable.ItemArray]
                 mov     ecx, [ebx+edx]
                 mov     [ebp+arg_4], ecx
                 test    ecx, ecx
@@ -2423,7 +2423,7 @@ loc_1958E85:                            ; CODE XREF: sub_1958D70+277j
 ; ---------------------------------------------------------------------------
 
 loc_1958E8E:                            ; CODE XREF: sub_1958D70+30j
-                mov     edx, [edi+TFileNameDatabase.Struct68_D0.BitArray_0.ItemArray]
+                mov     edx, [edi+TFileNameDatabase.Struct68_D0.ItemIsPresent.ItemArray]
                 mov     eax, ecx
                 and     ecx, 1Fh
                 mov     ebx, 1
@@ -2432,21 +2432,21 @@ loc_1958E8E:                            ; CODE XREF: sub_1958D70+30j
                 test    [edx+eax*4], ebx
                 mov     eax, [ebp+arg_4]
                 jz      loc_1958F50
-                mov     ebx, [edi+TFileNameDatabase.bytes_138.ItemArray]
+                mov     ebx, [edi+TFileNameDatabase.FrgmDist_LoBits.ItemArray]
                 push    eax
                 lea     ecx, [edi+TFileNameDatabase.Struct68_D0]
                 add     ebx, eax
-                call    sub_1959B60
-                mov     ecx, [edi+TFileNameDatabase.BitEntries_150.BitsPerEntry]
+                call    TSparseArray__GetItemValue
+                mov     ecx, [edi+TFileNameDatabase.FrgmDist_HiBits.BitsPerEntry]
                 imul    ecx, eax
                 mov     eax, ecx
                 and     ecx, 1Fh
                 mov     edx, ecx
-                mov     ecx, [edi+TFileNameDatabase.BitEntries_150.BitsPerEntry]
+                mov     ecx, [edi+TFileNameDatabase.FrgmDist_HiBits.BitsPerEntry]
                 add     ecx, edx
                 shr     eax, 5
                 cmp     ecx, 20h
-                mov     ecx, [edi+TFileNameDatabase.BitEntries_150.ItemArray]
+                mov     ecx, [edi+TFileNameDatabase.FrgmDist_HiBits.ItemArray]
                 ja      short loc_1958EF2
                 mov     eax, [ecx+eax*4]
                 mov     ecx, edx
@@ -2470,7 +2470,7 @@ loc_1958EF2:                            ; CODE XREF: sub_1958D70+177j
                 or      eax, edx
 
 loc_1958F15:                            ; CODE XREF: sub_1958D70+180j
-                and     eax, [edi+TFileNameDatabase.BitEntries_150.EntryBitMask]
+                and     eax, [edi+TFileNameDatabase.FrgmDist_HiBits.EntryBitMask]
                 movzx   edx, byte ptr [ebx]
                 mov     ecx, [edi+TFileNameDatabase.NextDB.pDatabase]
                 shl     eax, 8
@@ -2493,7 +2493,7 @@ loc_1958F3C:                            ; CODE XREF: sub_1958D70+1BCj
 ; ---------------------------------------------------------------------------
 
 loc_1958F50:                            ; CODE XREF: sub_1958D70+139j
-                mov     edx, [edi+TFileNameDatabase.bytes_138.ItemArray]
+                mov     edx, [edi+TFileNameDatabase.FrgmDist_LoBits.ItemArray]
                 mov     cl, [eax+edx]
                 mov     eax, [esi+TStruct40.array_00.ItemCount]
                 mov     [ebp+var_1], cl
@@ -2581,7 +2581,7 @@ sub_1958D70     endp
 
 ; Attributes: bp-based frame
 
-TFileNameDatabase__sub_1959CB0 proc near ; CODE XREF: TFileNameDatabase__sub_1957970+A1p
+TFileNameDatabase__sub_1959CB0 proc near ; CODE XREF: TFileNameDatabase__CheckNextPathFragment+A1p
                                         ; TFileNameDatabase__sub_1958B00+E8p ...
 
 pThis           = dword ptr -4
@@ -2768,7 +2768,7 @@ loc_1959E49:                            ; CODE XREF: TFileNameDatabase__sub_1959
 loc_1959E53:                            ; CODE XREF: TFileNameDatabase__sub_1959CB0+FEj
                                         ; TFileNameDatabase__sub_1959CB0+10Bj ...
                 mov     eax, [ebp+pThis]
-                mov     ebx, [eax+TFileNameDatabase.Struct68_00.BitArray_0.ItemArray]
+                mov     ebx, [eax+TFileNameDatabase.Struct68_00.ItemIsPresent.ItemArray]
                 mov     ecx, [ebx+edi*4]
                 not     ecx
                 mov     eax, ecx
@@ -2865,7 +2865,7 @@ TFileNameDatabase__sub_1959CB0 endp
 
 ; Attributes: bp-based frame
 
-sub_195A570     proc near               ; CODE XREF: TArchiveDatabase__sub_1958B00+74p
+TNameIndexStruct__CheckAndCopyNameFragment     proc near               ; CODE XREF: TArchiveDatabase__sub_1958B00+74p
                                         ; TArchiveDatabase__sub_1958B00+1E0p ...
 
 var_C           = dword ptr -0Ch
@@ -2880,7 +2880,7 @@ dwDistance      = dword ptr  0Ch
                 mov     eax, [ebp+pStruct1C]
                 push    ebx
                 mov     edx, ecx
-                cmp     [edx+TNameIndexStruct.Struct68.field_18], 0
+                cmp     [edx+TNameIndexStruct.Struct68.TotalItemCount], 0
                 push    esi
                 mov     esi, [eax+TMndxFindResult.pStruct40]
                 push    edi
@@ -2892,10 +2892,10 @@ dwDistance      = dword ptr  0Ch
                 mov     [ebp+pThis], edi
                 lea     ebx, [ebx+0]
 
-loc_195A5A0:                            ; CODE XREF: sub_195A570+E6j
+loc_195A5A0:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+E6j
                 mov     edx, [esi+TStruct40.CharIndex]
                 mov     ecx, [ebp+pStruct1C]
-                mov     eax, [ecx+TMndxFindResult.szPathName]
+                mov     eax, [ecx+TMndxFindResult.szSearchMask]
                 mov     cl, [edx+edi]
                 mov     [ebp+dwDistance], edx
                 cmp     cl, [edx+eax]
@@ -2916,11 +2916,11 @@ loc_195A5A0:                            ; CODE XREF: sub_195A570+E6j
                 jmp     short loc_195A5E0
 ; ---------------------------------------------------------------------------
 
-loc_195A5DD:                            ; CODE XREF: sub_195A570+66j
+loc_195A5DD:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+66j
                 lea     ebx, [ecx+ecx]
 
-loc_195A5E0:                            ; CODE XREF: sub_195A570+5Ej
-                                        ; sub_195A570+6Bj
+loc_195A5E0:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+5Ej
+                                        ; TNameIndexStruct__CheckAndCopyNameFragment+6Bj
                 push    offset unk_53ABE00
                 push    ebx
                 call    j_operator_new_safe
@@ -2930,7 +2930,7 @@ loc_195A5E0:                            ; CODE XREF: sub_195A570+5Ej
                 cmp     [esi+TStruct40.array_00.ItemCount], ecx
                 jbe     short loc_195A60C
 
-loc_195A5F7:                            ; CODE XREF: sub_195A570+9Aj
+loc_195A5F7:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+9Aj
                 lea     edx, [ecx+edi]
                 test    edx, edx
                 jz      short loc_195A606
@@ -2938,12 +2938,12 @@ loc_195A5F7:                            ; CODE XREF: sub_195A570+9Aj
                 mov     al, [ecx+eax]
                 mov     [edx], al
 
-loc_195A606:                            ; CODE XREF: sub_195A570+8Cj
+loc_195A606:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+8Cj
                 inc     ecx
                 cmp     ecx, [esi+TStruct40.array_00.ItemCount]
                 jb      short loc_195A5F7
 
-loc_195A60C:                            ; CODE XREF: sub_195A570+85j
+loc_195A60C:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+85j
                 mov     eax, [esi+TStruct40.array_00.DataBuffer]
                 push    eax
                 mov     [esi+TStruct40.array_00.DataBuffer], edi
@@ -2956,14 +2956,14 @@ loc_195A60C:                            ; CODE XREF: sub_195A570+85j
                 add     esp, 4
                 mov     ebx, 1
 
-loc_195A62D:                            ; CODE XREF: sub_195A570+56j
+loc_195A62D:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+56j
                 mov     eax, [esi+TStruct40.array_00.field_4]
                 add     eax, [esi+TStruct40.array_00.ItemCount]
                 jz      short loc_195A63A
                 mov     cl, [edx+edi]
                 mov     [eax], cl
 
-loc_195A63A:                            ; CODE XREF: sub_195A570+C3j
+loc_195A63A:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+C3j
                 add     [esi+TStruct40.CharIndex], ebx
                 add     [esi+TStruct40.array_00.ItemCount], ebx
                 mov     ecx, [esi+TStruct40.CharIndex]
@@ -2971,12 +2971,12 @@ loc_195A63A:                            ; CODE XREF: sub_195A570+C3j
                 mov     eax, [esi+TStruct40.array_00.ItemCount]
                 jz      loc_195A806
                 mov     edx, [ebp+pStruct1C]
-                cmp     ecx, [edx+TMndxFindResult.cchPathName]
+                cmp     ecx, [edx+TMndxFindResult.cchSearchMask]
                 jb      loc_195A5A0
                 add     edi, ecx
                 mov     edi, edi
 
-loc_195A660:                            ; CODE XREF: sub_195A570+13Aj
+loc_195A660:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+13Aj
                 mov     ecx, [esi+TStruct40.array_00.MaxItemCount]
                 inc     eax
                 cmp     eax, ecx
@@ -2991,8 +2991,8 @@ loc_195A660:                            ; CODE XREF: sub_195A570+13Aj
                 jmp     short loc_195A68B
 ; ---------------------------------------------------------------------------
 
-loc_195A67D:                            ; CODE XREF: sub_195A570+41j
-                                        ; sub_195A570+16Bj
+loc_195A67D:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+41j
+                                        ; TNameIndexStruct__CheckAndCopyNameFragment+16Bj
                 pop     edi
                 pop     esi
                 xor     al, al
@@ -3002,23 +3002,23 @@ loc_195A67D:                            ; CODE XREF: sub_195A570+41j
                 retn    8
 ; ---------------------------------------------------------------------------
 
-loc_195A688:                            ; CODE XREF: sub_195A570+106j
+loc_195A688:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+106j
                 lea     edx, [ecx+ecx]
 
-loc_195A68B:                            ; CODE XREF: sub_195A570+FEj
-                                        ; sub_195A570+10Bj
+loc_195A68B:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+FEj
+                                        ; TNameIndexStruct__CheckAndCopyNameFragment+10Bj
                 push    edx
                 mov     ecx, esi
                 call    TGenericArray__SetMaxItems_BYTE
 
-loc_195A693:                            ; CODE XREF: sub_195A570+F6j
+loc_195A693:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+F6j
                 mov     eax, [esi+TStruct40.array_00.field_4]
                 add     eax, [esi+TStruct40.array_00.ItemCount]
                 jz      short loc_195A69F
                 mov     cl, [edi]
                 mov     [eax], cl
 
-loc_195A69F:                            ; CODE XREF: sub_195A570+129j
+loc_195A69F:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+129j
                 add     [esi+TStruct40.array_00.ItemCount], ebx
                 mov     eax, [esi+TStruct40.array_00.ItemCount]
                 add     edi, ebx
@@ -3033,11 +3033,11 @@ loc_195A69F:                            ; CODE XREF: sub_195A570+129j
                 retn    8
 ; ---------------------------------------------------------------------------
 
-loc_195A6B7:                            ; CODE XREF: sub_195A570+18j
+loc_195A6B7:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+18j
                 mov     ebx, [ebp+dwDistance]
                 lea     ebx, [ebx+0]
 
-loc_195A6C0:                            ; CODE XREF: sub_195A570+231j
+loc_195A6C0:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+231j
                 mov     edi, [edx+TNameIndexStruct.NameFragments.ItemArray]
                 mov     eax, [ebp+pStruct1C]
                 mov     ecx, [esi+TStruct40.CharIndex]
@@ -3064,12 +3064,12 @@ loc_195A6C0:                            ; CODE XREF: sub_195A570+231j
                 jmp     short loc_195A707
 ; ---------------------------------------------------------------------------
 
-loc_195A702:                            ; CODE XREF: sub_195A570+187j
+loc_195A702:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+187j
                 add     ecx, ecx
                 mov     [ebp+var_4], ecx
 
-loc_195A707:                            ; CODE XREF: sub_195A570+17Fj
-                                        ; sub_195A570+190j
+loc_195A707:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+17Fj
+                                        ; TNameIndexStruct__CheckAndCopyNameFragment+190j
                 mov     edx, [ebp+var_4]
                 push    offset unk_53ABE00
                 push    edx
@@ -3080,7 +3080,7 @@ loc_195A707:                            ; CODE XREF: sub_195A570+17Fj
                 cmp     [esi+TStruct40.array_00.ItemCount], ecx
                 jbe     short loc_195A736
 
-loc_195A721:                            ; CODE XREF: sub_195A570+1C4j
+loc_195A721:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+1C4j
                 lea     edx, [ecx+edi]
                 test    edx, edx
                 jz      short loc_195A730
@@ -3088,12 +3088,12 @@ loc_195A721:                            ; CODE XREF: sub_195A570+1C4j
                 mov     al, [ecx+eax]
                 mov     [edx], al
 
-loc_195A730:                            ; CODE XREF: sub_195A570+1B6j
+loc_195A730:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+1B6j
                 inc     ecx
                 cmp     ecx, [esi+TStruct40.array_00.ItemCount]
                 jb      short loc_195A721
 
-loc_195A736:                            ; CODE XREF: sub_195A570+1AFj
+loc_195A736:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+1AFj
                 mov     eax, [esi+TStruct40.array_00.DataBuffer]
                 mov     ecx, [ebp+var_4]
                 push    eax
@@ -3105,7 +3105,7 @@ loc_195A736:                            ; CODE XREF: sub_195A570+1AFj
                 mov     edx, [ebp+pThis]
                 add     esp, 4
 
-loc_195A752:                            ; CODE XREF: sub_195A570+176j
+loc_195A752:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+176j
                 mov     edi, [esi+TStruct40.array_00.field_4]
                 add     edi, [esi+TStruct40.array_00.ItemCount]
                 jz      short loc_195A761
@@ -3113,7 +3113,7 @@ loc_195A752:                            ; CODE XREF: sub_195A570+176j
                 mov     cl, [eax]
                 mov     [edi], cl
 
-loc_195A761:                            ; CODE XREF: sub_195A570+1E8j
+loc_195A761:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+1E8j
                 mov     ecx, 1
                 add     [esi+TStruct40.array_00.ItemCount], ecx
                 add     [esi+TStruct40.CharIndex], ecx
@@ -3140,8 +3140,8 @@ loc_195A761:                            ; CODE XREF: sub_195A570+1E8j
                 jmp     loc_195A6C0
 ; ---------------------------------------------------------------------------
 
-loc_195A7A6:                            ; CODE XREF: sub_195A570+22Cj
-                                        ; sub_195A570+294j
+loc_195A7A6:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+22Cj
+                                        ; TNameIndexStruct__CheckAndCopyNameFragment+294j
                 mov     ecx, [ebp+pThis]
                 mov     edi, [ecx+8]
                 mov     ecx, [esi+TStruct40.array_00.MaxItemCount]
@@ -3158,23 +3158,23 @@ loc_195A7A6:                            ; CODE XREF: sub_195A570+22Cj
                 jmp     short loc_195A7CC
 ; ---------------------------------------------------------------------------
 
-loc_195A7C9:                            ; CODE XREF: sub_195A570+252j
+loc_195A7C9:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+252j
                 lea     edx, [ecx+ecx]
 
-loc_195A7CC:                            ; CODE XREF: sub_195A570+24Aj
-                                        ; sub_195A570+257j
+loc_195A7CC:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+24Aj
+                                        ; TNameIndexStruct__CheckAndCopyNameFragment+257j
                 push    edx
                 mov     ecx, esi
                 call    TGenericArray__SetMaxItems_BYTE
 
-loc_195A7D4:                            ; CODE XREF: sub_195A570+242j
+loc_195A7D4:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+242j
                 mov     eax, [esi+TStruct40.array_00.field_4]
                 add     eax, [esi+TStruct40.array_00.ItemCount]
                 jz      short loc_195A7E1
                 mov     dl, [edi+ebx]
                 mov     [eax], dl
 
-loc_195A7E1:                            ; CODE XREF: sub_195A570+26Aj
+loc_195A7E1:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+26Aj
                 inc     [esi+TStruct40.array_00.ItemCount]
                 mov     edi, [ebp+pThis]
                 mov     edi, [edi+20h]
@@ -3190,8 +3190,8 @@ loc_195A7E1:                            ; CODE XREF: sub_195A570+26Aj
                 test    edx, edx
                 jz      short loc_195A7A6
 
-loc_195A806:                            ; CODE XREF: sub_195A570+DAj
-                                        ; sub_195A570+221j
+loc_195A806:                            ; CODE XREF: TNameIndexStruct__CheckAndCopyNameFragment+DAj
+                                        ; TNameIndexStruct__CheckAndCopyNameFragment+221j
                 pop     edi
                 pop     esi
                 mov     al, 1
@@ -3199,7 +3199,7 @@ loc_195A806:                            ; CODE XREF: sub_195A570+DAj
                 mov     esp, ebp
                 pop     ebp
                 retn    8
-sub_195A570     endp
+TNameIndexStruct__CheckAndCopyNameFragment     endp
 
 ; =============== S U B R O U T I N E =======================================
 
@@ -3226,17 +3226,17 @@ arg_4           = dword ptr  0Ch
                 mov     ecx, [ebp+arg_4]
 
 loc_1959024:                            ; CODE XREF: sub_1959010+2CEj
-                mov     eax, [edi+TFileNameDatabase.dwKeyMask]
+                mov     eax, [edi+TFileNameDatabase.NameFragIndexMask]
                 and     eax, ecx
                 lea     ebx, [eax+eax*2]
-                mov     eax, [edi+TFileNameDatabase.triplets_1F8.ItemArray]
+                mov     eax, [edi+TFileNameDatabase.NameFragTable.ItemArray]
                 add     ebx, ebx
                 add     ebx, ebx
                 add     eax, ebx
                 mov     [ebp+pFragmentInfo], ebx
-                cmp     ecx, [eax+FRAGMENT_INFO.NextHashModifier]
+                cmp     ecx, [eax+NAME_ENTRY.NextHashModifier]
                 jnz     loc_1959147
-                mov     edx, [eax+FRAGMENT_INFO.FragmentOffset]
+                mov     edx, [eax+NAME_ENTRY.FragmentOffset]
                 mov     ecx, edx
                 and     ecx, 0FFFFFF00h
                 cmp     ecx, 0FFFFFF00h
@@ -3255,7 +3255,7 @@ loc_1959070:                            ; CODE XREF: sub_1959010+53j
                 mov     eax, [ebp+pStruct1C]
                 push    eax
                 lea     ecx, [edi+TFileNameDatabase.IndexStruct_174]
-                call    sub_195A570
+                call    TNameIndexStruct__CheckAndCopyNameFragment
 
 loc_195907F:                            ; CODE XREF: sub_1959010+5Ej
                 test    al, al
@@ -3274,7 +3274,7 @@ loc_1959087:                            ; CODE XREF: sub_1959010+90j
 
 loc_1959092:                            ; CODE XREF: sub_1959010+48j
                 mov     ecx, [ebp+pStruct1C]
-                mov     eax, [ecx+TMndxFindResult.szPathName]
+                mov     eax, [ecx+TMndxFindResult.szSearchMask]
                 mov     ecx, [esi+TStruct40.CharIndex]
                 mov     byte ptr [ebp+arg_4+3], dl
                 cmp     dl, [eax+ecx]
@@ -3347,7 +3347,7 @@ loc_1959123:                            ; CODE XREF: sub_1959010+10Fj
                 add     [esi+TStruct40.CharIndex], eax
 
 loc_195912E:                            ; CODE XREF: sub_1959010+71j
-                mov     eax, [edi+TFileNameDatabase.triplets_1F8.ItemArray]
+                mov     eax, [edi+TFileNameDatabase.NameFragTable.ItemArray]
                 mov     ecx, [ebx+eax]
                 mov     [ebp+arg_4], ecx
                 test    ecx, ecx
@@ -3356,7 +3356,7 @@ loc_195912E:                            ; CODE XREF: sub_1959010+71j
 ; ---------------------------------------------------------------------------
 
 loc_1959147:                            ; CODE XREF: sub_1959010+31j
-                mov     eax, [edi+TFileNameDatabase.Struct68_D0.BitArray_0.ItemArray]
+                mov     eax, [edi+TFileNameDatabase.Struct68_D0.ItemIsPresent.ItemArray]
                 mov     edx, ecx
                 and     ecx, 1Fh
                 mov     ebx, 1
@@ -3365,21 +3365,21 @@ loc_1959147:                            ; CODE XREF: sub_1959010+31j
                 test    [eax+edx*4], ebx
                 mov     eax, [ebp+arg_4]
                 jz      loc_195920E
-                mov     ebx, [edi+TFileNameDatabase.bytes_138.ItemArray]
+                mov     ebx, [edi+TFileNameDatabase.FrgmDist_LoBits.ItemArray]
                 push    eax
                 lea     ecx, [edi+TFileNameDatabase.Struct68_D0]
                 add     ebx, eax
-                call    sub_1959B60
-                mov     ecx, [edi+TFileNameDatabase.BitEntries_150.BitsPerEntry]
+                call    TSparseArray__GetItemValue
+                mov     ecx, [edi+TFileNameDatabase.FrgmDist_HiBits.BitsPerEntry]
                 imul    ecx, eax
                 mov     eax, ecx
                 and     ecx, 1Fh
                 mov     edx, ecx
-                mov     ecx, [edi+TFileNameDatabase.BitEntries_150.BitsPerEntry]
+                mov     ecx, [edi+TFileNameDatabase.FrgmDist_HiBits.BitsPerEntry]
                 add     ecx, edx
                 shr     eax, 5
                 cmp     ecx, 20h
-                mov     ecx, [edi+TFileNameDatabase.BitEntries_150.ItemArray]
+                mov     ecx, [edi+TFileNameDatabase.FrgmDist_HiBits.ItemArray]
                 ja      short loc_19591AB
                 mov     eax, [ecx+eax*4]
                 mov     ecx, edx
@@ -3403,7 +3403,7 @@ loc_19591AB:                            ; CODE XREF: sub_1959010+190j
                 or      eax, edx
 
 loc_19591CE:                            ; CODE XREF: sub_1959010+199j
-                and     eax, [edi+TFileNameDatabase.BitEntries_150.EntryBitMask]
+                and     eax, [edi+TFileNameDatabase.FrgmDist_HiBits.EntryBitMask]
                 movzx   edx, byte ptr [ebx]
                 mov     ecx, [edi+TFileNameDatabase.NextDB.pDatabase]
                 shl     eax, 8
@@ -3421,7 +3421,7 @@ loc_19591F2:                            ; CODE XREF: sub_1959010+1D5j
                 mov     ecx, [ebp+pStruct1C]
                 push    ecx
                 lea     ecx, [edi+TFileNameDatabase.IndexStruct_174]
-                call    sub_195A570
+                call    TNameIndexStruct__CheckAndCopyNameFragment
 
 loc_1959201:                            ; CODE XREF: sub_1959010+1E0j
                 test    al, al
@@ -3430,10 +3430,10 @@ loc_1959201:                            ; CODE XREF: sub_1959010+1E0j
 ; ---------------------------------------------------------------------------
 
 loc_195920E:                            ; CODE XREF: sub_1959010+152j
-                mov     edx, [edi+TFileNameDatabase.bytes_138.ItemArray]
+                mov     edx, [edi+TFileNameDatabase.FrgmDist_LoBits.ItemArray]
                 mov     dl, [eax+edx]
                 mov     ecx, [ebp+pStruct1C]
-                mov     eax, [ecx+TMndxFindResult.szPathName]
+                mov     eax, [ecx+TMndxFindResult.szSearchMask]
                 mov     ecx, [esi+TStruct40.CharIndex]
                 mov     [ebp+var_1], dl
                 cmp     dl, [eax+ecx]
@@ -3522,7 +3522,7 @@ loc_19592B6:                            ; CODE XREF: sub_1959010+1F9j
 loc_19592D5:                            ; CODE XREF: sub_1959010+132j
                 mov     edx, [esi+TStruct40.CharIndex]
                 mov     eax, [ebp+pStruct1C]
-                cmp     edx, [eax+TMndxFindResult.cchPathName]
+                cmp     edx, [eax+TMndxFindResult.cchSearchMask]
                 jb      loc_1959024
                 push    ecx
                 push    eax
@@ -3607,27 +3607,27 @@ arg_0           = dword ptr  8
                 sub     esp, 0Ch
                 mov     edx, [ebp+pStruct1C]
                 push    ebx
-                mov     ebx, [edx+TMndxFindResult.szPathName]
+                mov     ebx, [edx+TMndxFindResult.szSearchMask]
                 push    esi
                 push    edi
                 mov     edi, [edx+TMndxFindResult.pStruct40]
                 mov     eax, [edi+TStruct40.CharIndex]
                 movzx   eax, byte ptr [eax+ebx]
                 mov     esi, ecx
-                mov     ecx, [edi+TStruct40.HashModifier]
+                mov     ecx, [edi+TStruct40.HashValue]
                 mov     ebx, ecx
                 shl     ebx, 5
                 xor     eax, ebx
-                mov     ebx, [esi+TFileNameDatabase.triplets_1F8.ItemArray]
+                mov     ebx, [esi+TFileNameDatabase.NameFragTable.ItemArray]
                 xor     eax, ecx
-                and     eax, [esi+TFileNameDatabase.dwKeyMask]
+                and     eax, [esi+TFileNameDatabase.NameFragIndexMask]
                 lea     eax, [eax+eax*2]
                 add     eax, eax
                 add     eax, eax
                 mov     [ebp+ItemArrayOffset], eax
                 cmp     ecx, [eax+ebx]
                 jnz     loc_1958BE5
-                mov     ecx, [eax+ebx+FRAGMENT_INFO.FragmentOffset]
+                mov     ecx, [eax+ebx+NAME_ENTRY.FragmentOffset]
                 mov     ebx, ecx
                 and     ebx, 0FFFFFF00h
                 cmp     ebx, 0FFFFFF00h
@@ -3644,7 +3644,7 @@ arg_0           = dword ptr  8
 
 loc_1958B6E:                            ; CODE XREF: TArchiveDatabase__sub_1958B00+63j
                 lea     ecx, [esi+TFileNameDatabase.IndexStruct_174]
-                call    sub_195A570
+                call    TNameIndexStruct__CheckAndCopyNameFragment
 
 loc_1958B79:                            ; CODE XREF: TArchiveDatabase__sub_1958B00+6Cj
                 test    al, al
@@ -3699,10 +3699,10 @@ loc_1958BBF:                            ; CODE XREF: TArchiveDatabase__sub_1958B
                 add     [edi+TStruct40.CharIndex], eax
 
 loc_1958BCA:                            ; CODE XREF: TArchiveDatabase__sub_1958B00+7Bj
-                mov     ecx, [esi+TFileNameDatabase.triplets_1F8.ItemArray]
+                mov     ecx, [esi+TFileNameDatabase.NameFragTable.ItemArray]
                 mov     edx, [ebp+ItemArrayOffset]
-                mov     eax, [ecx+edx+FRAGMENT_INFO.NextHashModifier]
-                mov     [edi+TStruct40.HashModifier], eax
+                mov     eax, [ecx+edx+NAME_ENTRY.NextHashModifier]
+                mov     [edi+TStruct40.HashValue], eax
 
 loc_1958BDA:                            ; CODE XREF: TArchiveDatabase__sub_1958B00+1E7j
                 pop     edi
@@ -3718,7 +3718,7 @@ loc_1958BE5:                            ; CODE XREF: TArchiveDatabase__sub_1958B
                 push    ecx
                 mov     ecx, esi
                 call    TArchiveDatabase__sub_1959CB0
-                mov     ebx, [esi+TFileNameDatabase.Struct68_00.BitArray_0.ItemArray]
+                mov     ebx, [esi+TFileNameDatabase.Struct68_00.ItemIsPresent.ItemArray]
                 inc     eax
                 mov     ecx, eax
                 and     ecx, 1Fh
@@ -3729,15 +3729,15 @@ loc_1958BE5:                            ; CODE XREF: TArchiveDatabase__sub_1958B
                 mov     [ebp+ItemArrayOffset], eax
                 test    [ebx+ecx*4], edx
                 jz      loc_1958B7D
-                sub     eax, [edi+TStruct40.HashModifier]
+                sub     eax, [edi+TStruct40.HashValue]
                 mov     [ebp+var_4], 0FFFFFFFFh
                 dec     eax
-                mov     [edi+TStruct40.HashModifier], eax
+                mov     [edi+TStruct40.HashValue], eax
                 lea     esp, [esp+0]
 
 loc_1958C20:                            ; CODE XREF: TArchiveDatabase__sub_1958B00+230j
-                mov     eax, [edi+TStruct40.HashModifier]
-                mov     ebx, [esi+TFileNameDatabase.Struct68_D0.BitArray_0.ItemArray]
+                mov     eax, [edi+TStruct40.HashValue]
+                mov     ebx, [esi+TFileNameDatabase.Struct68_D0.ItemIsPresent.ItemArray]
                 mov     ecx, eax
                 and     ecx, 1Fh
                 mov     edx, 1
@@ -3751,7 +3751,7 @@ loc_1958C20:                            ; CODE XREF: TArchiveDatabase__sub_1958B
                 jnz     short loc_1958C5E
                 push    eax
                 lea     ecx, [esi+TFileNameDatabase.Struct68_D0]
-                call    sub_1959B60
+                call    TSparseArray__GetItemValue
                 mov     ecx, eax
                 mov     [ebp+var_4], eax
                 jmp     short loc_1958C62
@@ -3764,7 +3764,7 @@ loc_1958C5E:                            ; CODE XREF: TArchiveDatabase__sub_1958B
 loc_1958C62:                            ; CODE XREF: TArchiveDatabase__sub_1958B00+15Cj
                 mov     edx, [edi+TStruct40.CharIndex]
                 mov     [ebp+var_C], edx
-                mov     edx, [esi+TFileNameDatabase.BitEntries_150.BitsPerEntry]
+                mov     edx, [esi+TFileNameDatabase.FrgmDist_HiBits.BitsPerEntry]
                 mov     eax, edx
                 imul    eax, ecx
                 mov     ecx, eax
@@ -3772,7 +3772,7 @@ loc_1958C62:                            ; CODE XREF: TArchiveDatabase__sub_1958B
                 add     edx, eax
                 shr     ecx, 5
                 cmp     edx, 20h
-                mov     edx, [esi+TFileNameDatabase.BitEntries_150.ItemArray]
+                mov     edx, [esi+TFileNameDatabase.FrgmDist_HiBits.ItemArray]
                 ja      short loc_1958C91
                 mov     edx, [edx+ecx*4]
                 mov     ecx, eax
@@ -3792,9 +3792,9 @@ loc_1958C91:                            ; CODE XREF: TArchiveDatabase__sub_1958B
                 or      edx, ebx
 
 loc_1958CA8:                            ; CODE XREF: TArchiveDatabase__sub_1958B00+18Fj
-                mov     ecx, [esi+TFileNameDatabase.bytes_138.ItemArray]
-                and     edx, [esi+TFileNameDatabase.BitEntries_150.EntryBitMask]
-                mov     eax, [edi+TStruct40.HashModifier]
+                mov     ecx, [esi+TFileNameDatabase.FrgmDist_LoBits.ItemArray]
+                and     edx, [esi+TFileNameDatabase.FrgmDist_HiBits.EntryBitMask]
+                mov     eax, [edi+TStruct40.HashValue]
                 movzx   eax, byte ptr [ecx+eax]
                 mov     ecx, [esi+TFileNameDatabase.NextDB.pDatabase]
                 shl     edx, 8
@@ -3812,7 +3812,7 @@ loc_1958CD6:                            ; CODE XREF: TArchiveDatabase__sub_1958B
                 mov     eax, [ebp+pStruct1C]
                 push    eax
                 lea     ecx, [esi+TFileNameDatabase.IndexStruct_174]
-                call    sub_195A570
+                call    TNameIndexStruct__CheckAndCopyNameFragment
 
 loc_1958CE5:                            ; CODE XREF: TArchiveDatabase__sub_1958B00+1D4j
                 test    al, al
@@ -3824,23 +3824,23 @@ loc_1958CE5:                            ; CODE XREF: TArchiveDatabase__sub_1958B
 ; ---------------------------------------------------------------------------
 
 loc_1958CFB:                            ; CODE XREF: TArchiveDatabase__sub_1958B00+13Dj
-                mov     edx, [esi+TFileNameDatabase.bytes_138.ItemArray]
+                mov     edx, [esi+TFileNameDatabase.FrgmDist_LoBits.ItemArray]
                 mov     ebx, [ebp+pStruct1C]
                 mov     ecx, [edi+TStruct40.CharIndex]
-                mov     ebx, [ebx+TMndxFindResult.szPathName]
+                mov     ebx, [ebx+TMndxFindResult.szSearchMask]
                 mov     dl, [eax+edx]
                 cmp     dl, [ecx+ebx]
                 jz      short loc_1958D41
 
 loc_1958D11:                            ; CODE XREF: TArchiveDatabase__sub_1958B00+1F9j
                 mov     eax, [ebp+ItemArrayOffset]
-                inc     [edi+TStruct40.HashModifier]
+                inc     [edi+TStruct40.HashValue]
                 inc     eax
                 mov     ecx, eax
                 and     ecx, 1Fh
                 mov     edx, 1
                 shl     edx, cl
-                mov     ecx, [esi+TFileNameDatabase.Struct68_00.BitArray_0.ItemArray]
+                mov     ecx, [esi+TFileNameDatabase.Struct68_00.ItemIsPresent.ItemArray]
                 mov     [ebp+ItemArrayOffset], eax
                 shr     eax, 5
                 test    [ecx+eax*4], edx
@@ -3855,7 +3855,7 @@ loc_1958D11:                            ; CODE XREF: TArchiveDatabase__sub_1958B
 ; ---------------------------------------------------------------------------
 
 loc_1958D41:                            ; CODE XREF: TArchiveDatabase__sub_1958B00+20Fj
-                mov     edx, [esi+TFileNameDatabase.bytes_138.ItemArray]
+                mov     edx, [esi+TFileNameDatabase.FrgmDist_LoBits.ItemArray]
                 mov     cl, [edx+eax]
                 lea     edx, [ebp+pStruct1C+3]
                 mov     byte ptr [ebp+pStruct1C+3], cl
@@ -3896,7 +3896,7 @@ pStruct1C       = dword ptr  8
                 push    edi
                 mov     edi, [ebp+pStruct1C]
                 mov     esi, [edi+TMndxFindResult.pStruct40]
-                mov     eax, [esi+TStruct40.field_3C]
+                mov     eax, [esi+TStruct40.SearchPhase]
                 mov     ebx, ecx
                 mov     [ebp+pThis], ebx
                 cmp     eax, 4
@@ -3904,9 +3904,9 @@ pStruct1C       = dword ptr  8
                 cmp     eax, 2
                 jz      loc_1959530
                 mov     ecx, esi
-                call    sub_19586B0
+                call    TStruct40__InitSearchBuffers
                 mov     eax, [esi+TStruct40.CharIndex]
-                cmp     eax, [edi+TMndxFindResult.cchPathName]
+                cmp     eax, [edi+TMndxFindResult.cchSearchMask]
                 jnb     short loc_19594B0
 
 loc_1959498:                            ; CODE XREF: TFileNameDatabase__sub_1959460+4Ej
@@ -3916,11 +3916,11 @@ loc_1959498:                            ; CODE XREF: TFileNameDatabase__sub_1959
                 test    al, al
                 jz      loc_1959778
                 mov     ecx, [esi+TStruct40.CharIndex]
-                cmp     ecx, [edi+TMndxFindResult.cchPathName]
+                cmp     ecx, [edi+TMndxFindResult.cchSearchMask]
                 jb      short loc_1959498
 
 loc_19594B0:                            ; CODE XREF: TFileNameDatabase__sub_1959460+36j
-                mov     edx, [esi+TStruct40.HashModifier]
+                mov     edx, [esi+TStruct40.HashValue]
                 or      eax, 0FFFFFFFFh
                 mov     [ebp+Struct14], edx
                 mov     [ebp+var_14], eax
@@ -3932,26 +3932,26 @@ loc_19594B0:                            ; CODE XREF: TFileNameDatabase__sub_1959
                 mov     [ebp+var_1C], 0
                 mov     [ebp+var_18], eax
                 call    TGenericArray__InsertItem_STRUCT14
-                mov     ecx, [esi+TStruct40.HashModifier]
+                mov     ecx, [esi+TStruct40.HashValue]
                 mov     eax, ecx
                 and     ecx, 1Fh
                 mov     edi, 1
                 shl     edi, cl
                 mov     [esi+TStruct40.ItemCount], 1
-                mov     edx, [ebx+TFileNameDatabase.Struct68_68.BitArray_0.ItemArray]
+                mov     edx, [ebx+TFileNameDatabase.FileNameIndexes.ItemIsPresent.ItemArray]
                 shr     eax, 5
                 test    [edx+eax*4], edi
                 jz      short loc_1959530
                 mov     ecx, [esi+TStruct40.array_00.field_4]
                 mov     eax, [esi+TStruct40.array_00.ItemCount]
                 mov     edi, [ebp+pStruct1C]
-                mov     [edi+TMndxFindResult.szFoundPathName], ecx
-                mov     [edi+TMndxFindResult.cchFoundPathName], eax
-                mov     esi, [esi+TStruct40.HashModifier]
+                mov     [edi+TMndxFindResult.szFoundPath], ecx
+                mov     [edi+TMndxFindResult.cchFoundPath], eax
+                mov     esi, [esi+TStruct40.HashValue]
                 push    esi
-                lea     ecx, [ebx+TFileNameDatabase.Struct68_68]
-                call    sub_1959B60
-                mov     [edi+TMndxFindResult.MndxIndex], eax
+                lea     ecx, [ebx+TFileNameDatabase.FileNameIndexes]
+                call    TSparseArray__GetItemValue
+                mov     [edi+TMndxFindResult.FileNameIndex], eax
                 pop     edi
                 pop     esi
                 mov     al, 1
@@ -3978,7 +3978,7 @@ loc_1959530:                            ; CODE XREF: TFileNameDatabase__sub_1959
                 lea     eax, [eax+eax*4]
                 lea     eax, [ecx+eax*4-14h]
                 mov     [ebp+pStruct14], eax
-                mov     eax, [eax+TStruct14.HashModifier]
+                mov     eax, [eax+TStruct14.HashValue]
                 push    eax
                 mov     ecx, ebx
                 call    TFileNameDatabase__sub_1959CB0
@@ -3986,7 +3986,7 @@ loc_1959530:                            ; CODE XREF: TFileNameDatabase__sub_1959
                 mov     ecx, [esi+TStruct40.array_18.ItemCount]
                 inc     eax
                 mov     ebx, eax
-                sub     ebx, [edx+TStruct14.HashModifier]
+                sub     ebx, [edx+TStruct14.HashValue]
                 mov     edx, [esi+TStruct40.array_18.MaxItemCount]
                 inc     ecx
                 dec     ebx
@@ -4016,7 +4016,7 @@ loc_1959591:                            ; CODE XREF: TFileNameDatabase__sub_1959
                 lea     ecx, [edx+ecx*4]
                 test    ecx, ecx
                 jz      short loc_19595B7
-                mov     [ecx+TStruct14.HashModifier], ebx
+                mov     [ecx+TStruct14.HashValue], ebx
                 mov     [ecx+TStruct14.field_4], eax
                 xor     eax, eax
                 mov     [ecx+TStruct14.field_8], eax
@@ -4032,7 +4032,7 @@ loc_19595B7:                            ; CODE XREF: TFileNameDatabase__sub_1959
 loc_19595BD:                            ; CODE XREF: TFileNameDatabase__sub_1959460+D6j
                 mov     eax, [esi+TStruct40.ItemCount]
                 mov     ecx, [esi+TStruct40.array_18.field_4]
-                mov     ebx, [ebx+TFileNameDatabase.Struct68_00.BitArray_0.ItemArray]
+                mov     ebx, [ebx+TFileNameDatabase.Struct68_00.ItemIsPresent.ItemArray]
                 lea     eax, [eax+eax*4]
                 lea     edi, [ecx+eax*4]
                 mov     eax, [edi+TStruct14.field_4]
@@ -4049,9 +4049,9 @@ loc_19595BD:                            ; CODE XREF: TFileNameDatabase__sub_1959
                 test    cl, cl
                 jz      loc_19596E9
                 inc     [esi+TStruct40.ItemCount]
-                mov     ecx, [edi+TStruct14.HashModifier]
+                mov     ecx, [edi+TStruct14.HashValue]
                 mov     eax, [ebp+pThis]
-                mov     eax, [eax+TFileNameDatabase.Struct68_D0.BitArray_0.ItemArray]
+                mov     eax, [eax+TFileNameDatabase.Struct68_D0.ItemIsPresent.ItemArray]
                 mov     edx, ecx
                 and     ecx, 1Fh
                 mov     ebx, 1
@@ -4063,10 +4063,10 @@ loc_19595BD:                            ; CODE XREF: TFileNameDatabase__sub_1959
                 mov     eax, [edi+TStruct14.field_C]
                 cmp     eax, 0FFFFFFFFh
                 jnz     short loc_195962F
-                mov     eax, [edi+TStruct14.HashModifier]
+                mov     eax, [edi+TStruct14.HashValue]
                 push    eax
                 lea     ecx, [ebx+TFileNameDatabase.Struct68_D0]
-                call    sub_1959B60
+                call    TSparseArray__GetItemValue
                 jmp     short loc_1959630
 ; ---------------------------------------------------------------------------
 
@@ -4074,7 +4074,7 @@ loc_195962F:                            ; CODE XREF: TFileNameDatabase__sub_1959
                 inc     eax
 
 loc_1959630:                            ; CODE XREF: TFileNameDatabase__sub_1959460+1CDj
-                mov     ecx, [edi+TStruct14.HashModifier]
+                mov     ecx, [edi+TStruct14.HashValue]
                 push    eax
                 push    ecx
                 mov     ecx, ebx
@@ -4099,8 +4099,8 @@ loc_1959654:                            ; CODE XREF: TFileNameDatabase__sub_1959
 ; ---------------------------------------------------------------------------
 
 loc_1959665:                            ; CODE XREF: TFileNameDatabase__sub_1959460+1B5j
-                mov     ecx, [ebx+TFileNameDatabase.bytes_138.ItemArray]
-                mov     eax, [edi+TStruct14.HashModifier]
+                mov     ecx, [ebx+TFileNameDatabase.FrgmDist_LoBits.ItemArray]
+                mov     eax, [edi+TStruct14.HashValue]
                 mov     dl, [eax+ecx]
                 mov     eax, [esi+TStruct40.array_00.ItemCount]
                 mov     ecx, [esi+TStruct40.array_00.MaxItemCount]
@@ -4140,9 +4140,9 @@ loc_19596AB:                            ; CODE XREF: TFileNameDatabase__sub_1959
 loc_19596AE:                            ; CODE XREF: TFileNameDatabase__sub_1959460+1F2j
                                         ; TFileNameDatabase__sub_1959460+203j
                 mov     edx, [esi+TStruct40.array_00.ItemCount]
-                mov     ecx, [edi+TStruct14.HashModifier]
+                mov     ecx, [edi+TStruct14.HashValue]
                 mov     [edi+TStruct14.field_8], edx
-                mov     edx, [ebx+TFileNameDatabase.Struct68_68.BitArray_0.ItemArray]
+                mov     edx, [ebx+TFileNameDatabase.FileNameIndexes.ItemIsPresent.ItemArray]
                 mov     eax, ecx
                 and     ecx, 1Fh
                 mov     ebx, 1
@@ -4153,11 +4153,11 @@ loc_19596AE:                            ; CODE XREF: TFileNameDatabase__sub_1959
                 mov     eax, [edi+TStruct14.field_10]
                 cmp     eax, 0FFFFFFFFh
                 jnz     short loc_1959754
-                mov     eax, [edi+TStruct14.HashModifier]
+                mov     eax, [edi+TStruct14.HashValue]
                 mov     ecx, [ebp+pThis]
                 push    eax
-                add     ecx, TFileNameDatabase.Struct68_68
-                call    sub_1959B60
+                add     ecx, TFileNameDatabase.FileNameIndexes
+                call    TSparseArray__GetItemValue
                 jmp     short loc_1959755
 ; ---------------------------------------------------------------------------
 
@@ -4214,12 +4214,12 @@ loc_1959755:                            ; CODE XREF: TFileNameDatabase__sub_1959
                 mov     ecx, [esi+TStruct40.array_00.ItemCount]
                 mov     edx, [esi+TStruct40.array_00.field_4]
                 mov     eax, [ebp+pStruct1C]
-                mov     [eax+TMndxFindResult.szFoundPathName], edx
-                mov     [eax+TMndxFindResult.cchFoundPathName], ecx
+                mov     [eax+TMndxFindResult.szFoundPath], edx
+                mov     [eax+TMndxFindResult.cchFoundPath], ecx
                 mov     ecx, [edi+TStruct14.field_10]
                 pop     edi
                 pop     esi
-                mov     [eax+TMndxFindResult.MndxIndex], ecx
+                mov     [eax+TMndxFindResult.FileNameIndex], ecx
                 mov     al, 1
                 pop     ebx
                 mov     esp, ebp
@@ -4229,7 +4229,7 @@ loc_1959755:                            ; CODE XREF: TFileNameDatabase__sub_1959
 
 loc_1959778:                            ; CODE XREF: TFileNameDatabase__sub_1959460+42j
                                         ; TFileNameDatabase__sub_1959460+28Fj
-                mov     [esi+TStruct40.field_3C], 4
+                mov     [esi+TStruct40.SearchPhase], 4
 
 return_false:                           ; CODE XREF: TFileNameDatabase__sub_1959460+1Aj
                 pop     edi
@@ -4316,21 +4316,21 @@ _sub_1958B00_x86 PROC
 _sub_1958B00_x86 ENDP
 
 ;
-; DWORD _cdecl sub_1959B60_x86(TStruct68 * pStruct, DWORD dwKey);
+; DWORD _cdecl GetItemValue_x86(TSparseArray * pStruct, DWORD dwKey);
 ;
 
-_sub_1959B60_x86 PROC
+_GetItemValue_x86 PROC
 
                 push    ebp
                 mov     ebp, esp
                 mov     ecx, [ebp+8]    ; pStruct68
                 push    [ebp+0Ch]       ; dwKey
-                call    sub_1959B60
+                call    TSparseArray__GetItemValue
                 mov     esp, ebp
                 pop     ebp
                 ret
 
-_sub_1959B60_x86 ENDP
+_GetItemValue_x86 ENDP
 
 ;
 ; DWORD _cdecl sub_1959CB0_x86(TFileNameDatabase * pDB, DWORD dwKey);

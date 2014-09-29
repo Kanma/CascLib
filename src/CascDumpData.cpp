@@ -176,7 +176,7 @@ static void DumpEncodingEntry(
         // Dump all encoding keys
         for(DWORD j = 0; j < pEncodingEntry->KeyCount; j++)
         {
-            fprintf(fp, "  IndexKey: %s\n", StringFromMD5(pbEncodingKey, szMd5));
+            fprintf(fp, "  Index Key: %s\n", StringFromMD5(pbEncodingKey, szMd5));
             DumpIndexKey(fp, hs, pbEncodingKey, ppIndexEntries);
             pbEncodingKey += MD5_HASH_SIZE;
         }
@@ -229,7 +229,7 @@ static void DumpRootEntries(FILE * fp, TCascStorage * hs, char ** FileNameArray)
     {
         // Copy all pointers
         memcpy(ppEncodingEntries, hs->ppEncodingEntries, hs->nEncodingEntries * sizeof(PCASC_ENCODING_ENTRY));
-        MapHashToPtr_EnumObjects(hs->pIndexEntryMap, (void **)ppIndexEntries);
+        Map_EnumObjects(hs->pIndexEntryMap, (void **)ppIndexEntries);
 
         // Parse all entries
         for(size_t i = 0; i < hs->nRootEntries; i++)
@@ -279,36 +279,121 @@ static void DumpRootEntries(FILE * fp, TCascStorage * hs, char ** FileNameArray)
 //-----------------------------------------------------------------------------
 // Public functions
 
-void CascDumpDatabase(const char * szFileName, void * pMarFile)
+void CascDumpSparseArray(const char * szFileName, void * pvSparseArray)
+{
+    TSparseArray * pSparseArray = (TSparseArray *)pvSparseArray;
+    FILE * fp;
+
+    // Create the dump file
+    fp = fopen(szFileName, "wt");
+    if(fp != NULL)                             
+    {
+        // Write header
+        fprintf(fp, "##   Value\n--   -----\n");
+                          
+        // Write the values
+        for(DWORD i = 0; i < pSparseArray->TotalItemCount; i++)
+        {
+            DWORD Value = 0;
+
+            if(pSparseArray->IsItemPresent(i))
+            {
+                Value = pSparseArray->GetItemValue(i);
+                fprintf(fp, "%02X    %02X\n", i, Value);
+            }
+            else
+            {
+                fprintf(fp, "%02X    --\n", i);
+            }
+        }
+
+        fclose(fp);
+    }
+}
+
+void CascDumpNameFragTable(const char * szFileName, void * pMarFile)
 {
     TFileNameDatabase * pDB = ((PMAR_FILE)pMarFile)->pDatabasePtr->pDB;
     FILE * fp;
 
     // Create the dump file
     fp = fopen(szFileName, "wt");
-    if(fp != NULL)
+    if(fp != NULL)                             
     {
-        PTRIPLET pTriplets = pDB->triplets_1F8.u.TRIPLETS.ItemArray;
-        const char * szNames = pDB->IndexStruct_174.NameFragments.u.CHARS.ItemArray;
-        DWORD dwEntries = pDB->triplets_1F8.u.TRIPLETS.ItemCount;
+        PNAME_FRAG pNameTable = pDB->NameFragTable.NameFragArray;
+        const char * szNames = pDB->IndexStruct_174.NameFragments.CharArray;
+        const char * szLastEntry;
+        char szMatchType[0x100];
 
-        for(DWORD i = 0; i < dwEntries; i++)
+        // Dump the table header
+        fprintf(fp, "Indx  ThisHash NextHash FragOffs\n");
+        fprintf(fp, "----  -------- -------- --------\n");
+
+        // Dump all name entries
+        for(DWORD i = 0; i < pDB->NameFragTable.ItemCount; i++)
         {
-            const char * szFragment = "";
-            char ch;
+            // Reset both match types
+            szMatchType[0] = 0;
+            szLastEntry = "";
 
-            if(pTriplets[i].Value3 < pDB->IndexStruct_174.NameFragments.u.CHARS.ItemCount)
-                szFragment = szNames + pTriplets[i].Value3;
+            // Only if the table entry is not empty
+            if(pNameTable->ItemIndex != 0xFFFFFFFF)
+            {
+                // Prepare the entry
+                if(IS_SINGLE_CHAR_MATCH(pDB->NameFragTable, i))
+                    sprintf(szMatchType, "SINGLE_CHAR (\'%c\')", (pNameTable->FragOffs & 0xFF));
+                else
+                    sprintf(szMatchType, "NAME_FRAGMT (\"%s\")", szNames + pNameTable->FragOffs);
+            }
 
-            ch = (0x20 <= i && i < 0x80) ? (char)i : 0x20;
-            fprintf(fp, "%02X (%C)  %08X  %08X   %08X   %s\n", i, ch,
-                                                          pTriplets[i].Value1,
-                                                          pTriplets[i].Value2,
-                                                          pTriplets[i].Value3,
-                                                          szFragment);
+            // Dump the entry
+            fprintf(fp, "0x%02X  %08x %08x %08x %s%s\n", i, pNameTable->ItemIndex,
+                                                            pNameTable->NextIndex,
+                                                            pNameTable->FragOffs,
+                                                            szMatchType,
+                                                            szLastEntry);
+            pNameTable++;
         }
         fclose(fp);
     }
+}
+
+void CascDumpFileNames(const char * szFileName, void * pvMarFile)
+{
+    TMndxFindResult Struct1C;
+    PMAR_FILE pMarFile = (PMAR_FILE)pvMarFile;
+    FILE * fp;
+    char szNameBuff[0x200];
+    bool bFindResult;
+
+    // Create the dump file
+    fp = fopen(szFileName, "wt");
+    if(fp != NULL)
+    {
+        // Set an empty path as search mask (?)
+        Struct1C.SetSearchPath("", 0);
+
+        // Keep searching
+        for(;;)
+        {
+            // Search the next file name
+            pMarFile->pDatabasePtr->sub_1956CE0(&Struct1C, &bFindResult);
+
+            // Stop the search in case of failure
+            if(!bFindResult)
+                break;
+
+            // Printf the found file name
+            memcpy(szNameBuff, Struct1C.szFoundPath, Struct1C.cchFoundPath);
+            szNameBuff[Struct1C.cchFoundPath] = 0;
+            fprintf(fp, "%s\n", szNameBuff);
+        }
+
+        fclose(fp);
+    }
+
+    // Free the search structures
+    Struct1C.FreeStruct40();
 }
 
 void CascDumpMndxRoot(const char * szFileName, PCASC_MNDX_INFO pMndxInfo)
@@ -351,7 +436,7 @@ void CascDumpIndexEntries(const char * szFileName, TCascStorage * hs)
         if(ppIndexEntries != NULL)
         {
             // Obtain the linear array of index entries
-            MapHashToPtr_EnumObjects(hs->pIndexEntryMap, (void **)ppIndexEntries);
+            Map_EnumObjects(hs->pIndexEntryMap, (void **)ppIndexEntries);
 
             // Sort the array by archive number and archive offset
             qsort_pointer_array((void **)ppIndexEntries, nIndexEntries, CompareIndexEntries_FilePos, NULL);

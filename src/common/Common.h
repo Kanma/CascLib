@@ -17,6 +17,10 @@
 // Macro for building 64-bit file offset from two 32-bit
 #define MAKE_OFFSET64(hi, lo)      (((ULONGLONG)hi << 32) | (ULONGLONG)lo)
 
+#ifndef ALIGN_TO_SIZE
+#define ALIGN_TO_SIZE(x, a)   (((x) + (a)-1) & ~((a)-1))
+#endif
+
 //-----------------------------------------------------------------------------
 // Conversion tables
 
@@ -56,8 +60,8 @@ TCHAR * CombinePath(const TCHAR * szPath, const TCHAR * szSubDir);
 void NormalizeFileName_UpperBkSlash(char * szFileName);
 void NormalizeFileName_LowerSlash(char * szFileName);
 
-int ConvertDigitToInt32(const TCHAR * szString, LPDWORD PtrValue);
-int ConvertStringToInt32(const TCHAR * szString, size_t nMaxDigits, LPDWORD PtrValue);
+int ConvertDigitToInt32(const TCHAR * szString, PDWORD PtrValue);
+int ConvertStringToInt32(const TCHAR * szString, size_t nMaxDigits, PDWORD PtrValue);
 char * StringFromBinary(LPBYTE pbBinary, size_t cbBinary, char * szBuffer);
 
 //-----------------------------------------------------------------------------
@@ -79,15 +83,15 @@ bool VerifyDataBlockHash(void * pvDataBlock, DWORD cbDataBlock, LPBYTE expected_
 //-----------------------------------------------------------------------------
 // Scanning a directory
 
-typedef bool (*INDEX_FILE_FOUND)(const TCHAR * szFileName, LPDWORD IndexArray, LPDWORD OldIndexArray, void * pvContext);
+typedef bool (*INDEX_FILE_FOUND)(const TCHAR * szFileName, PDWORD IndexArray, PDWORD OldIndexArray, void * pvContext);
 
 bool DirectoryExists(const TCHAR * szDirectory);
 
 int ScanIndexDirectory(
     const TCHAR * szIndexPath,
     INDEX_FILE_FOUND pfnOnFileFound,
-    LPDWORD IndexArray,
-    LPDWORD OldIndexArray,
+    PDWORD IndexArray,
+    PDWORD OldIndexArray,
     void * pvContext
     );
 

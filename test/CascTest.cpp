@@ -192,6 +192,8 @@ static int TestOpenStorage_EnumFiles(const TCHAR * szStorage, const TCHAR * szLi
     CASC_FIND_DATA FindData;
     HANDLE hStorage;
     HANDLE hFind;
+    DWORD dwTotalFiles = 0;
+    DWORD dwFoundFiles = 0;
     bool bFileFound = true;
     int nError = ERROR_SUCCESS;
 
@@ -204,6 +206,10 @@ static int TestOpenStorage_EnumFiles(const TCHAR * szStorage, const TCHAR * szLi
 
     if(nError == ERROR_SUCCESS)
     {
+        // Retrieve the total number of files
+        CascGetStorageInfo(hStorage, CascStorageFileCount, &dwTotalFiles, sizeof(dwTotalFiles), NULL);
+
+        // Start finding
         hFind = CascFindFirstFile(hStorage, "*", &FindData, szListFile);
         if(hFind != NULL)
         {
@@ -211,6 +217,7 @@ static int TestOpenStorage_EnumFiles(const TCHAR * szStorage, const TCHAR * szLi
             {
                 // Extract the file
 //              printf("%s\n", FindData.szFileName);
+                dwFoundFiles++;
 
                 // Find the next file in CASC
                 bFileFound = CascFindNextFile(hFind, &FindData);
@@ -299,20 +306,20 @@ int main(int argc, char * argv[])
 
     // Test open CASC storage for HOTS
 //  if(nError == ERROR_SUCCESS)
-//      nError = TestOpenStorage_OpenFile(MAKE_PATH("2014 - Heroes of the Storm/29049/BNTData"), "mods/heroes.stormmod/base.stormmaps/maps/heroes/builtin/startingexperience/practicemode01.stormmap/enus.stormdata/localizeddata/gamestrings.txt");
-
-//  if(nError == ERROR_SUCCESS)
-//      nError = TestOpenStorage_OpenFile(MAKE_PATH("2014 - WoW/18125/Data"), "Cameras\\Abyssal_Maw_CameraFly_01.M2");
+//      nError = TestOpenStorage_OpenFile(MAKE_PATH("2014 - Heroes of the Storm/29049/BNTData"), "mods/heroes.stormmod/base.stormmaps/maps/heroes/builtin/startingexperience/practicemode01.stormmap/dede.stormdata/localizeddata/gamestrings.txt");
 
     // List all files in CASC storage with MNDX info
 //  if(nError == ERROR_SUCCESS)
-//      nError = TestOpenStorage_EnumFiles(MAKE_PATH("2014 - Heroes of the Storm/29049/BNTData"));
+//      nError = TestOpenStorage_EnumFiles(MAKE_PATH("2014 - Heroes of the Storm/30509/HeroesData"));
 
 //  if(nError == ERROR_SUCCESS)
 //      nError = TestOpenStorage_EnumFiles(MAKE_PATH("2014 - Heroes of the Storm/30414/HeroesData"));
 
+//  if(nError == ERROR_SUCCESS)
+//      nError = TestOpenStorage_OpenFile(MAKE_PATH("2014 - WoW/18125/Data"), "Interface\\Glues\\MODELS\\UI_MainMenu_Warlords\\Caustic_MedFreq.blp");
+
     if(nError == ERROR_SUCCESS)
-        nError = TestOpenStorage_EnumFiles(_T("Data"), _T("e:\\Ladik\\AppDir\\CascLib\\listfile\\listfile-wow6.txt"));
+        nError = TestOpenStorage_EnumFiles(MAKE_PATH("2014 - WoW/18865/Data"), _T("e:\\Ladik\\AppDir\\CascLib\\listfile\\listfile-wow6.txt"));
 
     // Extracting the complete storage
 //  if(nError == ERROR_SUCCESS && argc == 3)
@@ -320,7 +327,7 @@ int main(int argc, char * argv[])
 
     // Test extracting the complete storage
 //  if(nError == ERROR_SUCCESS)
-//      nError = TestOpenStorage_ExtractFiles(MAKE_PATH("2014 - Heroes of the Storm/30414/HeroesData"), MAKE_PATH("Work"), NULL);
+//      nError = TestOpenStorage_ExtractFiles(MAKE_PATH("2014 - Heroes of the Storm/31726/HeroesData"), MAKE_PATH("Work"), NULL);
 
 #ifdef _MSC_VER
     _CrtDumpMemoryLeaks();

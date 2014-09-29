@@ -35,6 +35,7 @@
   #include <stdio.h>
   #include <windows.h>
   #include <wininet.h>
+  #include <sys/types.h>
   #define PLATFORM_LITTLE_ENDIAN
 
   #ifdef WIN64
@@ -63,6 +64,7 @@
   #include <unistd.h>
   #include <fcntl.h>
   #include <stdlib.h>
+  #include <dirent.h>
   #include <errno.h>
 
   // Support for PowerPC on Max OS X
@@ -85,6 +87,7 @@
   #define PLATFORM_MAC
   #define PLATFORM_DEFINED                  // The platform is known now
 
+  #define FIELD_OFFSET(t,f) offsetof(t,f)
 #endif
 
 //-----------------------------------------------------------------------------
@@ -98,6 +101,7 @@
   #include <fcntl.h>
   #include <dirent.h>
   #include <unistd.h>
+  #include <stddef.h>
   #include <stdint.h>
   #include <stdlib.h>
   #include <stdio.h>
@@ -114,6 +118,7 @@
   #define PLATFORM_LINUX
   #define PLATFORM_DEFINED
 
+  #define FIELD_OFFSET(t,f) offsetof(t,f)
 #endif
 
 //-----------------------------------------------------------------------------
@@ -142,7 +147,7 @@
   typedef char           TCHAR;
   typedef unsigned int   LCID;
   typedef LONG         * PLONG;
-  typedef DWORD        * LPDWORD;
+  typedef DWORD        * PDWORD;
   typedef BYTE         * LPBYTE;
 
   #ifdef PLATFORM_32BIT

@@ -24,8 +24,8 @@
 #include "CascPort.h"
 #include "common/Common.h"
 #include "common/FileStream.h"
-#include "common/HashToPtr.h"
 #include "common/ListFile.h"
+#include "common/Map.h"
 
 // Headers from LibTomCrypt
 #include "libtomcrypt/src/headers/tomcrypt.h"
@@ -52,24 +52,21 @@
 #define CASC_MAX_MAR_FILES           3          // Maximum of 3 MAR files are supported
 #define CASC_MNDX_SIGNATURE 0x58444E4D          // 'MNDX'
 
+#define CASC_SEARCH_HAVE_NAME   0x0001          // Indicated that previous search found a name
+
 // Prevent problems with CRT "min" and "max" functions,
 // as they are not defined on all platforms
 #define CASCLIB_MIN(a, b) ((a < b) ? a : b)
 #define CASCLIB_MAX(a, b) ((a > b) ? a : b)
 #define CASCLIB_UNUSED(p) ((void)(p))
 
+#define CASC_PACKAGE_BUFFER     0x1000
+
 //-----------------------------------------------------------------------------
 // Structures
 
 struct TFileStream;
 struct _MAR_FILE;
-
-typedef struct _DYNAMIC_BUFFER
-{
-    LPBYTE pbBuffer;                                // Pointer to the buffer
-    size_t cbBuffer;                                // Current size in pbBuffer
-    size_t cbBufferMax;                             // Total size in pbBuffer
-} DYNAMIC_BUFFER, *PDYNAMIC_BUFFER;
 
 typedef struct _CASC_INDEX_ENTRY
 {
@@ -78,7 +75,7 @@ typedef struct _CASC_INDEX_ENTRY
     BYTE FileSize[4];
 } CASC_INDEX_ENTRY, *PCASC_INDEX_ENTRY;
 
-typedef struct _KEY_MAPPING_TABLE
+typedef struct _CASC_MAPPING_TABLE
 {
     TCHAR * szFileName;                             // Name of the key mapping file
     LPBYTE  pbFileData;                             // Pointer to the file data
@@ -93,7 +90,7 @@ typedef struct _KEY_MAPPING_TABLE
     PCASC_INDEX_ENTRY pIndexEntries;                // Sorted array of index entries
     DWORD nIndexEntries;                            // Number of index entries
 
-} KEY_MAPPING_TABLE, *PKEY_MAPPING_TABLE;
+} CASC_MAPPING_TABLE, *PCASC_MAPPING_TABLE;
 
 typedef struct _CASC_FILE_FRAME
 {
@@ -188,12 +185,12 @@ typedef struct _CASC_MNDX_INFO
 
 } CASC_MNDX_INFO, *PCASC_MNDX_INFO;
 
-typedef struct _CASC_NAME_ENTRY
+typedef struct _CASC_PACKAGE
 {
     char * szFileName;                              // Pointer to file name
     size_t nLength;                                 // Length of the file name
 
-} CASC_NAME_ENTRY, *PCASC_NAME_ENTRY;
+} CASC_PACKAGE, *PCASC_PACKAGE;
 
 typedef struct _CASC_PACKAGES
 {
@@ -202,7 +199,7 @@ typedef struct _CASC_PACKAGES
     size_t NameBufferUsed;                          // Number of bytes used in the name buffer
     size_t NameBufferMax;                           // Total size of the name buffer
 
-    CASC_NAME_ENTRY Names[1];                       // List of name entries
+    CASC_PACKAGE Packages[1];                       // List of packages
 
 } CASC_PACKAGES, *PCASC_PACKAGES;
 
@@ -239,10 +236,10 @@ typedef struct _TCascStorage
     QUERY_KEY EncodingEKey;
     DWORD EncodingKeys;
 
-    TFileStream * DataFileArray[CASC_MAX_DATA_FILES];      // Data file handles
+    TFileStream * DataFileArray[CASC_MAX_DATA_FILES]; // Data file handles
 
-    KEY_MAPPING_TABLE KeyMapping[CASC_INDEX_COUNT]; // Key mapping
-    PMAP_HASH_TO_PTR pIndexEntryMap;                // Map of index entries
+    CASC_MAPPING_TABLE KeyMapping[CASC_INDEX_COUNT]; // Key mapping
+    PCASC_MAP pIndexEntryMap;                       // Map of index entries
 
     PCASC_ENCODING_HEADER pEncodingHeader;          // The encoding file
     PCASC_ENCODING_ENTRY * ppEncodingEntries;       // Map of encoding entries
@@ -253,7 +250,7 @@ typedef struct _TCascStorage
     size_t nRootEntries;                            // Number of root entries
 
     PCASC_MNDX_INFO pMndxInfo;                      // Used for storages which have MNDX/MAR file
-    PCASC_PACKAGES pPackages;                       // Name list for top level directories
+    PCASC_PACKAGES pPackages;                       // Linear list of present packages
 
 } TCascStorage;
 
@@ -293,8 +290,8 @@ typedef struct _TCascSearch
     char * szMask;
     char szFileName[MAX_PATH];                      // Buffer for the file name
     char szNormName[MAX_PATH];                      // Buffer for normalized file name
-    ULONGLONG PrevNameHash;                         // Previous value of the file name hash
-    size_t PrevRootIndex;                           // Root index of the previously found item
+    ULONGLONG FileNameHash;                         // Name hash being searched right now
+    size_t RootIndex;                               // Root index of the previously found item
     DWORD dwState;                                  // Pointer to the state (0 = listfile, 1 = nameless, 2 = done)
     BYTE BitArray[1];                               // Bit array of already-reported files
 
@@ -357,19 +354,23 @@ PCASC_ROOT_ENTRY     FindFirstRootEntry(TCascStorage * hs, const char * szFileNa
 PCASC_ENCODING_ENTRY FindEncodingEntry(TCascStorage * hs, PQUERY_KEY pEncodingKey, size_t * PtrIndex);
 PCASC_INDEX_ENTRY    FindIndexEntry(TCascStorage * hs, PQUERY_KEY pIndexKey);
 
-int CascDecompress(void * pvOutBuffer, LPDWORD pcbOutBuffer, void * pvInBuffer, DWORD cbInBuffer);
+int CascDecompress(void * pvOutBuffer, PDWORD pcbOutBuffer, void * pvInBuffer, DWORD cbInBuffer);
 
 //-----------------------------------------------------------------------------
 // Dump data
 
 #ifdef _DEBUG
-void CascDumpDatabase(const char * szFileName, void * pMarFile);
+void CascDumpSparseArray(const char * szFileName, void * pvSparseArray);
+void CascDumpNameFragTable(const char * szFileName, void * pvMarFile);
+void CascDumpFileNames(const char * szFileName, void * pvMarFile);
 void CascDumpMndxRoot(const char * szFileName, PCASC_MNDX_INFO pMndxInfo);
 void CascDumpIndexEntries(const char * szFileName, TCascStorage * hs);
 void CascDumpStorage(const char * szFileName, TCascStorage * hs, const TCHAR * szListFile);
 void CascDumpFile(const char * szFileName, HANDLE hFile);
 #else   // _DEBUG
-#define CascDumpDatabase(n,d)       /* */
+#define CascDumpSparseArray(n,a)    /* */
+#define CascDumpNameFragTable(n, m) /* */
+#define CascDumpFileNames(n, m)     /* */
 #define CascDumpMndxRoot(n,i)       /* */
 #define CascDumpIndexEntries(n,h)   /* */
 #define CascDumpStorage(n,h)        /* */
