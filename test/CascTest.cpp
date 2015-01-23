@@ -21,6 +21,8 @@
 #include "../src/CascLib.h"
 #include "../src/CascCommon.h"
 
+#include "TLogHelper.cpp"
+
 #ifdef _MSC_VER
 #pragma warning(disable: 4505)              // 'XXX' : unreferenced local function has been removed
 #endif
@@ -33,7 +35,7 @@
 // Defines
 
 #ifdef PLATFORM_WINDOWS
-#define WORK_PATH_ROOT "E:\\Multimedia\\MPQs"
+#define WORK_PATH_ROOT "\\Multimedia\\MPQs"
 #endif
 
 #ifdef PLATFORM_LINUX
@@ -45,6 +47,8 @@
 #endif
 
 #define MAKE_PATH(subdir)  (_T(WORK_PATH_ROOT) _T("\\") _T(subdir))
+
+static const char szCircleChar[] = "|/-\\";
 
 //-----------------------------------------------------------------------------
 // Local functions
@@ -80,12 +84,13 @@ static int ForceCreatePath(TCHAR * szFullPath)
 
 static int ExtractFile(HANDLE hStorage, const char * szFileName, const TCHAR * szLocalPath, DWORD dwLocaleFlags)
 {
-    TFileStream * pStream = NULL;
+//  TFileStream * pStream = NULL;
     HANDLE hFile = NULL;
     TCHAR szLocalFileName[MAX_PATH];
     TCHAR * szNamePtr = szLocalFileName;
     BYTE Buffer[0x1000];
-    DWORD dwBytesRead;
+    DWORD dwBytesRead = 0;
+    bool bResult;
     int nError = ERROR_SUCCESS;
 
     // Create the file path
@@ -109,37 +114,56 @@ static int ExtractFile(HANDLE hStorage, const char * szFileName, const TCHAR * s
     }
 
     // Create the local file
-    if(nError == ERROR_SUCCESS)
-    {
-        pStream = FileStream_CreateFile(szLocalFileName, 0);
-        if(pStream == NULL)
-        {
-            // Try to create all directories and retry
-            ForceCreatePath(szLocalFileName);
-            pStream = FileStream_CreateFile(szLocalFileName, 0);
-            if(pStream == NULL)
-                nError = GetLastError();
-        }
-    }
+//  if(nError == ERROR_SUCCESS)
+//  {
+//      pStream = FileStream_CreateFile(szLocalFileName, 0);
+//      if(pStream == NULL)
+//      {
+//          // Try to create all directories and retry
+//          ForceCreatePath(szLocalFileName);
+//          pStream = FileStream_CreateFile(szLocalFileName, 0);
+//          if(pStream == NULL)
+//              nError = GetLastError();
+//      }
+//  }
 
     // Read some data from the file
     if(nError == ERROR_SUCCESS)
     {
-        for(;;)
+        while(dwBytesRead == 0)
         {
             // Read data from the file
-            CascReadFile(hFile, Buffer, sizeof(Buffer), &dwBytesRead);
-            if(dwBytesRead == 0)
+            bResult = CascReadFile(hFile, Buffer, sizeof(Buffer), &dwBytesRead);
+            if(bResult == false)
+            {
+                nError = GetLastError();
                 break;
+            }
 
             // Write the local file
-            FileStream_Write(pStream, NULL, Buffer, dwBytesRead);
+//          if(dwBytesRead != 0)
+//              FileStream_Write(pStream, NULL, Buffer, dwBytesRead);
         }
     }
 
+    // Log the file sizes
+#ifdef CASCLIB_TEST
+//  if(nError == ERROR_SUCCESS)
+//  {
+//      TCascFile * hf = IsValidFileHandle(hFile);
+//
+//      fprintf(fp, "%8u %8u %8u %8u %8u %s\n", hf->FileSize_RootEntry,
+//                                              hf->FileSize_EncEntry,
+//                                              hf->FileSize_IdxEntry,
+//                                              hf->FileSize_HdrArea,
+//                                              hf->FileSize_FrameSum,
+//                                              szFileName);
+//  }
+#endif
+
     // Close handles
-    if(pStream != NULL)
-        FileStream_Close(pStream);
+//  if(pStream != NULL)
+//      FileStream_Close(pStream);
     if(hFile != NULL)
         CascCloseFile(hFile);
     return nError;
@@ -157,28 +181,26 @@ static int TestOpenStorage_OpenFile(const TCHAR * szStorage, const char * szFile
     int nError = ERROR_SUCCESS;
 
     // Open the storage directory
-    if(!CascOpenStorage(szStorage, 0, &hStorage))
+    if(!CascOpenStorage(szStorage, CASC_LOCALE_ENGB, &hStorage))
     {
         assert(GetLastError() != ERROR_SUCCESS);
         nError = GetLastError();
     }
 
-    if(nError == ERROR_SUCCESS)
+    if(nError == ERROR_SUCCESS && szFileName != NULL)
     {
         // Open a file
-        if(!CascOpenFile(hStorage, szFileName, 0, 0, &hFile))
+        if(CascOpenFile(hStorage, szFileName, 0, 0, &hFile))
+        {
+            CascGetFileSize(hFile, NULL);
+            CascReadFile(hFile, Buffer, sizeof(Buffer), &dwBytesRead);
+            CascCloseFile(hFile);
+        }
+        else
         {
             assert(GetLastError() != ERROR_SUCCESS);
             nError = GetLastError();
         }
-    }
-
-    // Read some data from the file
-    if(nError == ERROR_SUCCESS)
-    {
-        // Read data from the file
-        CascReadFile(hFile, Buffer, sizeof(Buffer), &dwBytesRead);
-        CascCloseFile(hFile);
     }
 
     // Close storage and return
@@ -190,14 +212,17 @@ static int TestOpenStorage_OpenFile(const TCHAR * szStorage, const char * szFile
 static int TestOpenStorage_EnumFiles(const TCHAR * szStorage, const TCHAR * szListFile = NULL)
 {
     CASC_FIND_DATA FindData;
+    TLogHelper LogHelper;
     HANDLE hStorage;
     HANDLE hFind;
     DWORD dwTotalFiles = 0;
     DWORD dwFoundFiles = 0;
+    DWORD dwCircleCount = 0;
     bool bFileFound = true;
     int nError = ERROR_SUCCESS;
 
     // Open the storage directory
+    LogHelper.PrintProgress("Opening storage ...");
     if(!CascOpenStorage(szStorage, 0, &hStorage))
     {
         assert(GetLastError() != ERROR_SUCCESS);
@@ -210,16 +235,21 @@ static int TestOpenStorage_EnumFiles(const TCHAR * szStorage, const TCHAR * szLi
         CascGetStorageInfo(hStorage, CascStorageFileCount, &dwTotalFiles, sizeof(dwTotalFiles), NULL);
 
         // Start finding
+        LogHelper.PrintProgress("Searching storage ...");
         hFind = CascFindFirstFile(hStorage, "*", &FindData, szListFile);
         if(hFind != NULL)
         {
             while(bFileFound)
             {
                 // Extract the file
-//              printf("%s\n", FindData.szFileName);
-                dwFoundFiles++;
+                if((dwFoundFiles % 400) == 0)
+                {
+                    LogHelper.PrintProgress("Enumerating files: %c", szCircleChar[dwCircleCount % 4]);
+                    dwCircleCount++;
+                }
 
                 // Find the next file in CASC
+                dwFoundFiles++;
                 bFileFound = CascFindNextFile(hFind, &FindData);
             }
 
@@ -228,6 +258,7 @@ static int TestOpenStorage_EnumFiles(const TCHAR * szStorage, const TCHAR * szLi
 
             // Close the search handle
             CascFindClose(hFind);
+            LogHelper.PrintProgress("");
         }
     }
 
@@ -240,12 +271,14 @@ static int TestOpenStorage_EnumFiles(const TCHAR * szStorage, const TCHAR * szLi
 static int TestOpenStorage_ExtractFiles(const TCHAR * szStorage, const TCHAR * szTargetDir, const TCHAR * szListFile)
 {
     CASC_FIND_DATA FindData;
+    TLogHelper LogHelper;
     HANDLE hStorage;
     HANDLE hFind;
     bool bFileFound = true;
     int nError = ERROR_SUCCESS;
 
     // Open the storage directory
+    LogHelper.PrintProgress("Opening storage ...");
     if(!CascOpenStorage(szStorage, 0, &hStorage))
     {
         assert(GetLastError() != ERROR_SUCCESS);
@@ -254,15 +287,20 @@ static int TestOpenStorage_ExtractFiles(const TCHAR * szStorage, const TCHAR * s
 
     if(nError == ERROR_SUCCESS)
     {
+        LogHelper.PrintProgress("Searching storage ...");
         hFind = CascFindFirstFile(hStorage, "*", &FindData, szListFile);
         if(hFind != INVALID_HANDLE_VALUE)
         {
+            // Search the storage
             while(bFileFound)
             {
                 // Extract the file
-                printf("Extracting: %s ...", FindData.szFileName);
+                LogHelper.PrintProgress("Extracting %s ...", FindData.szPlainName);
                 nError = ExtractFile(hStorage, FindData.szFileName, szTargetDir, FindData.dwLocaleFlags);
-                printf((nError == ERROR_SUCCESS) ? "OK\n" : "Failed\n");
+
+                // Terminate the line
+                if(nError != ERROR_SUCCESS)
+                    LogHelper.PrintError("Extracting %s .. Failed", FindData.szPlainName);
 
                 // Find the next file in CASC
                 bFileFound = CascFindNextFile(hFind, &FindData);
@@ -270,6 +308,7 @@ static int TestOpenStorage_ExtractFiles(const TCHAR * szStorage, const TCHAR * s
 
             // Close the search handle
             CascFindClose(hFind);
+            LogHelper.PrintProgress("");
         }
     }
 
@@ -279,14 +318,40 @@ static int TestOpenStorage_ExtractFiles(const TCHAR * szStorage, const TCHAR * s
     return nError;
 }
 
-static int TestOpenStorage_ExtractFilesArgs(const char * szStorage, const char * szTargetDir)
+static int Hack()
 {
-    TCHAR szStorageT[MAX_PATH];
-    TCHAR szTargetT[MAX_PATH];
+/*
+    HANDLE hFile;
+    BYTE Buffer[0x100];
+    hash_state md5_state;
+    LPBYTE pbStartHash = &Buffer[BLTE_HEADER_DELTA];
+    BYTE md5_hash[MD5_HASH_SIZE];
+    uint32_t dwHashHigh = 0;
+    uint32_t dwHashLow = 0;
+    DWORD dwBytesRead = 0;
 
-    CopyString(szStorageT, szStorage, strlen(szStorage));
-    CopyString(szTargetT, szTargetDir, strlen(szTargetDir));
-    return TestOpenStorage_ExtractFiles(szStorageT, szTargetT, NULL);
+    hFile = CreateFile(_T("e:\\Multimedia\\MPQs\\2014 - WoW\\18888\\Data\\data\\data.017"), GENERIC_READ, 0, NULL, OPEN_EXISTING, 0, NULL);
+    if(hFile != INVALID_HANDLE_VALUE)
+    {
+        SetFilePointer(hFile, 0x34CBFE8C, NULL, FILE_BEGIN);
+        ReadFile(hFile, Buffer, sizeof(Buffer), &dwBytesRead, NULL);
+        CloseHandle(hFile);
+
+        for(int i = 1; i < 4+4+16; i++)
+        {
+            dwHashHigh = dwHashLow = 0;
+            hashlittle2(pbStartHash, i, &dwHashHigh, &dwHashLow);
+
+            md5_init(&md5_state);
+            md5_process(&md5_state, pbStartHash, i);
+            md5_done(&md5_state, md5_hash);
+
+            if((dwHashHigh & 0xFF) == 0xAF)
+                DebugBreak();
+        }
+    }
+*/
+    return ERROR_SUCCESS;
 }
 
 //-----------------------------------------------------------------------------
@@ -294,9 +359,11 @@ static int TestOpenStorage_ExtractFilesArgs(const char * szStorage, const char *
 
 int main(int argc, char * argv[])
 {
+    const TCHAR * szListFile = _T("\\Ladik\\AppDir\\CascLib\\listfile\\listfile-wow6.txt");
     int nError = ERROR_SUCCESS;
 
     // Keep compiler happy
+    szListFile = szListFile;
     argc = argc;
     argv = argv;
 
@@ -304,32 +371,50 @@ int main(int argc, char * argv[])
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif  // defined(_MSC_VER) && defined(_DEBUG)
 
-    // Test open CASC storage for HOTS
 //  if(nError == ERROR_SUCCESS)
-//      nError = TestOpenStorage_OpenFile(MAKE_PATH("2014 - Heroes of the Storm/29049/BNTData"), "mods/heroes.stormmod/base.stormmaps/maps/heroes/builtin/startingexperience/practicemode01.stormmap/dede.stormdata/localizeddata/gamestrings.txt");
-
-    // List all files in CASC storage with MNDX info
-//  if(nError == ERROR_SUCCESS)
-//      nError = TestOpenStorage_EnumFiles(MAKE_PATH("2014 - Heroes of the Storm/30509/HeroesData"));
+//      nError = Hack();
 
 //  if(nError == ERROR_SUCCESS)
-//      nError = TestOpenStorage_EnumFiles(MAKE_PATH("2014 - Heroes of the Storm/30414/HeroesData"));
+//      nError = TestOpenStorage_OpenFile(MAKE_PATH("2014 - WoW/18865/Data"), "SPELLS\\T_VFX_BLOOD06B.BLP");
 
 //  if(nError == ERROR_SUCCESS)
-//      nError = TestOpenStorage_OpenFile(MAKE_PATH("2014 - WoW/18125/Data"), "Interface\\Glues\\MODELS\\UI_MainMenu_Warlords\\Caustic_MedFreq.blp");
+//      nError = TestOpenStorage_OpenFile(MAKE_PATH("2014 - WoW/18888/Data"), "SPELLS\\T_VFX_BLOOD06B.BLP");
+
+//  if(nError == ERROR_SUCCESS)
+//      nError = TestOpenStorage_OpenFile(MAKE_PATH("2014 - WoW/19342/Data"), "World\\Minimaps\\WMO\\Dungeon\\Azjol_Uppercity\\Azjol_Uppercity_001_02_05.blp");
+
+//  if(nError == ERROR_SUCCESS)
+//      nError = TestOpenStorage_EnumFiles(MAKE_PATH("2014 - Heroes of the Storm/30509/HeroesData"), NULL);
 
     if(nError == ERROR_SUCCESS)
-        nError = TestOpenStorage_EnumFiles(MAKE_PATH("2014 - WoW/18865/Data"), _T("e:\\Ladik\\AppDir\\CascLib\\listfile\\listfile-wow6.txt"));
+        nError = TestOpenStorage_EnumFiles(MAKE_PATH("2014 - Heroes of the Storm/31726/HeroesData"), NULL);
 
-    // Extracting the complete storage
-//  if(nError == ERROR_SUCCESS && argc == 3)
-//      nError = TestOpenStorage_ExtractFilesArgs(argv[1], argv[2]);
+//  if(nError == ERROR_SUCCESS)
+//      nError = TestOpenStorage_EnumFiles(_T("c:\\Hry\\Heroes of the Storm\\HeroesData"), NULL);
+
+//  if(nError == ERROR_SUCCESS)
+//      nError = TestOpenStorage_EnumFiles(MAKE_PATH("2014 - WoW/18865/Data"), szListFile);
+
+//  if(nError == ERROR_SUCCESS)
+//      nError = TestOpenStorage_EnumFiles(MAKE_PATH("2014 - WoW/18888/Data"), szListFile);
+
+//  if(nError == ERROR_SUCCESS)
+//      nError = TestOpenStorage_EnumFiles(MAKE_PATH("2014 - WoW/19116/Data"), szListFile);
 
     // Test extracting the complete storage
 //  if(nError == ERROR_SUCCESS)
-//      nError = TestOpenStorage_ExtractFiles(MAKE_PATH("2014 - Heroes of the Storm/31726/HeroesData"), MAKE_PATH("Work"), NULL);
+//      nError = TestOpenStorage_ExtractFiles(MAKE_PATH("2014 - Heroes of the Storm/29049/BNTData"), _T("Work"), NULL);
 
-#ifdef _MSC_VER
+//  if(nError == ERROR_SUCCESS)
+//      nError = TestOpenStorage_ExtractFiles(MAKE_PATH("2014 - WoW/18865/Data"), _T("Work"), szListFile);
+
+//  if(nError == ERROR_SUCCESS)
+//      nError = TestOpenStorage_ExtractFiles(MAKE_PATH("2014 - WoW/18888/Data"), _T("Work"), szListFile);
+
+//  if(nError == ERROR_SUCCESS)
+//      nError = TestOpenStorage_ExtractFiles(MAKE_PATH("2014 - WoW/19116/Data"), _T("Work"), szListFile);
+
+#ifdef _MSC_VER                                                          
     _CrtDumpMemoryLeaks();
 #endif  // _MSC_VER
 

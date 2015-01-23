@@ -202,6 +202,11 @@ DWORD GetNumberOfSetBits(DWORD Value32)
 
 static bool RootFileRead(LPBYTE pbFilePointer, LPBYTE pbFileEnd, void * pvBuffer, size_t dwBytesToRead)
 {
+    // False if the file pointer is beyond the end
+    if(pbFilePointer > pbFileEnd)
+        return false;
+
+    // False if there is not enough bytes available
     if((size_t)(pbFileEnd - pbFilePointer) < dwBytesToRead)
         return false;
 
@@ -2867,6 +2872,14 @@ PCASC_PACKAGE FindMndxPackage(TCascStorage * hs, const char * szFileName)
     assert(hs->pPackages != NULL);
     pPackage = hs->pPackages->Packages;
 
+    //FILE * fp = fopen("E:\\packages.txt", "wt");
+    //for(size_t i = 0; i < hs->pPackages->NameEntries; i++, pPackage++)
+    //{
+    //    if(pPackage->szFileName != NULL)
+    //        fprintf(fp, "%s\n", pPackage->szFileName);
+    //}
+    //fclose(fp);
+
     // Find the longest matching name
     for(size_t i = 0; i < hs->pPackages->NameEntries; i++, pPackage++)
     {
@@ -2887,10 +2900,12 @@ PCASC_PACKAGE FindMndxPackage(TCascStorage * hs, const char * szFileName)
 
 static bool FillFindData(TCascSearch * pSearch, PCASC_FIND_DATA pFindData, TMndxFindResult * pStruct1C)
 {
-    CASC_ROOT_KEY_INFO RootKeyInfo;
+    PCASC_ROOT_ENTRY_MNDX pRootEntry = NULL;
     TCascStorage * hs = pSearch->hs;
     PCASC_PACKAGE pPackage;
-    char * szStrippedName;
+    char * szStrippedPtr;
+    char szStrippedName[MAX_PATH];
+    
     int nError;
 
     // Sanity check
@@ -2899,6 +2914,7 @@ static bool FillFindData(TCascSearch * pSearch, PCASC_FIND_DATA pFindData, TMndx
     // Fill the file name
     memcpy(pFindData->szFileName, pStruct1C->szFoundPath, pStruct1C->cchFoundPath);
     pFindData->szFileName[pStruct1C->cchFoundPath] = 0;
+    pFindData->szPlainName = (char *)GetPlainFileName(pFindData->szFileName);
     pFindData->dwFileSize = CASC_INVALID_SIZE;
     
     // Fill the file size
@@ -2906,14 +2922,19 @@ static bool FillFindData(TCascSearch * pSearch, PCASC_FIND_DATA pFindData, TMndx
     if(pPackage != NULL)
     {
         // Cut the package name off the full path
-        szStrippedName = pFindData->szFileName + pPackage->nLength;
-        while(szStrippedName[0] == '/')
-            szStrippedName++;
+        szStrippedPtr = pFindData->szFileName + pPackage->nLength;
+        while(szStrippedPtr[0] == '/')
+            szStrippedPtr++;
 
-        nError = SearchMndxInfo(hs->pMndxInfo, szStrippedName, (DWORD)(pPackage - hs->pPackages->Packages), &RootKeyInfo);
+        // We need to convert the stripped name to lowercase, replacing backslashes with slashes
+        strcpy(szStrippedName, szStrippedPtr);
+        NormalizeFileName_LowerSlash(szStrippedName);
+
+        // Search the package
+        nError = SearchMndxInfo(hs->pMndxInfo, szStrippedName, (DWORD)(pPackage - hs->pPackages->Packages), &pRootEntry);
         if(nError == ERROR_SUCCESS)
         {
-            pFindData->dwFileSize = (DWORD)RootKeyInfo.FileSize;
+            pFindData->dwFileSize = pRootEntry->FileSize;
         }
     }
     return true;
@@ -3014,7 +3035,7 @@ int LoadMndxRootFile(TCascStorage * hs, LPBYTE pbRootFile, DWORD cbRootFile)
     {
         if(pMndxInfo->pMarFile1 == NULL || pMndxInfo->pMarFile2 == NULL || pMndxInfo->pMarFile3 == NULL)
             nError = ERROR_BAD_FORMAT;
-        if(pMndxInfo->MndxEntrySize != sizeof(CASC_MNDX_ENTRY))
+        if(pMndxInfo->MndxEntrySize != sizeof(CASC_ROOT_ENTRY_MNDX))
             nError = ERROR_BAD_FORMAT;
     }
 
@@ -3028,7 +3049,7 @@ int LoadMndxRootFile(TCascStorage * hs, LPBYTE pbRootFile, DWORD cbRootFile)
         if(nError == ERROR_SUCCESS && FileNameCount == pMndxInfo->MndxEntriesValid)
         {
             cbToAllocate = pMndxInfo->MndxEntriesTotal * pMndxInfo->MndxEntrySize;
-            pMndxInfo->pMndxEntries = (PCASC_MNDX_ENTRY)CASC_ALLOC(BYTE, cbToAllocate);
+            pMndxInfo->pMndxEntries = (PCASC_ROOT_ENTRY_MNDX)CASC_ALLOC(BYTE, cbToAllocate);
             if(pMndxInfo->pMndxEntries != NULL)
             {
                 if(!RootFileRead(pbRootFile + pMndxInfo->MndxEntriesOffset, pbRootFileEnd, pMndxInfo->pMndxEntries, cbToAllocate))
@@ -3045,10 +3066,10 @@ int LoadMndxRootFile(TCascStorage * hs, LPBYTE pbRootFile, DWORD cbRootFile)
     if(nError == ERROR_SUCCESS)
     {
         assert(pMndxInfo->MndxEntriesValid <= pMndxInfo->MndxEntriesTotal);
-        pMndxInfo->ppValidEntries = CASC_ALLOC(PCASC_MNDX_ENTRY, pMndxInfo->MndxEntriesValid + 1);
+        pMndxInfo->ppValidEntries = CASC_ALLOC(PCASC_ROOT_ENTRY_MNDX, pMndxInfo->MndxEntriesValid + 1);
         if(pMndxInfo->ppValidEntries != NULL)
         {
-            PCASC_MNDX_ENTRY pMndxEntry = pMndxInfo->pMndxEntries;
+            PCASC_ROOT_ENTRY_MNDX pRootEntry = pMndxInfo->pMndxEntries;
             DWORD ValidEntryCount = 1; // edx
             DWORD nIndex1 = 0;
 
@@ -3056,14 +3077,14 @@ int LoadMndxRootFile(TCascStorage * hs, LPBYTE pbRootFile, DWORD cbRootFile)
             pMndxInfo->ppValidEntries[nIndex1++] = pMndxInfo->pMndxEntries;
 
             // Put the remaining entries
-            for(i = 0; i < pMndxInfo->MndxEntriesTotal; i++, pMndxEntry++)
+            for(i = 0; i < pMndxInfo->MndxEntriesTotal; i++, pRootEntry++)
             {
                 if(ValidEntryCount > pMndxInfo->MndxEntriesValid)
                     break;
 
-                if(pMndxEntry->Flags & 0x80000000)
+                if(pRootEntry->Flags & 0x80000000)
                 {
-                    pMndxInfo->ppValidEntries[nIndex1++] = pMndxEntry + 1;
+                    pMndxInfo->ppValidEntries[nIndex1++] = pRootEntry + 1;
                     ValidEntryCount++;
                 }
             }
@@ -3106,9 +3127,9 @@ int LoadMndxRootFile(TCascStorage * hs, LPBYTE pbRootFile, DWORD cbRootFile)
     return nError;
 }
 
-int SearchMndxInfo(PCASC_MNDX_INFO pMndxInfo, const char * szFileName, DWORD dwPackage, PCASC_ROOT_KEY_INFO pFoundInfo)
+int SearchMndxInfo(PCASC_MNDX_INFO pMndxInfo, const char * szFileName, DWORD dwPackage, PCASC_ROOT_ENTRY_MNDX * ppRootEntry)
 {
-    PCASC_MNDX_ENTRY pMndxEntry;
+    PCASC_ROOT_ENTRY_MNDX pRootEntry;
     TMndxFindResult Struct1C;
 
     // Search the database for the file name
@@ -3124,20 +3145,19 @@ int SearchMndxInfo(PCASC_MNDX_INFO pMndxInfo, const char * szFileName, DWORD dwP
         if(Struct1C.FileNameIndex < pMndxInfo->MndxEntriesValid)
         {
             // HOTS: E945F4
-            pMndxEntry = pMndxInfo->ppValidEntries[Struct1C.FileNameIndex];
-            while((pMndxEntry->Flags & 0x00FFFFFF) != dwPackage)
+            pRootEntry = pMndxInfo->ppValidEntries[Struct1C.FileNameIndex];
+            while((pRootEntry->Flags & 0x00FFFFFF) != dwPackage)
             {
                 // The highest bit serves as a terminator if set
-                if(pMndxEntry->Flags & 0x80000000)
+                if(pRootEntry->Flags & 0x80000000)
                     return ERROR_FILE_NOT_FOUND;
 
-                pMndxEntry++;
+                pRootEntry++;
             }
 
-            // Fill the root info
-            memcpy(pFoundInfo->EncodingKey, pMndxEntry->EncodingKey, MD5_HASH_SIZE);
-            pFoundInfo->FileSize = pMndxEntry->FileSize;
-            pFoundInfo->Flags = (BYTE)((pMndxEntry->Flags >> 0x18) & 0x3F);
+            // Give the root entry pointer to the caller
+            if(ppRootEntry != NULL)
+                ppRootEntry[0] = pRootEntry;
             return ERROR_SUCCESS;
         }
     }
@@ -3213,14 +3233,18 @@ extern "C" {
 
 extern "C" void * allocate_zeroed_memory_x86(size_t bytes)
 {
-    return calloc(bytes, 1);
+    void * ptr = CASC_ALLOC(BYTE, bytes);
+
+    if(ptr != NULL)
+        memset(ptr, 0, bytes);
+    return ptr;
 }
 
 extern "C" void free_memory_x86(void * ptr)
 {
     if(ptr != NULL)
     {
-        free(ptr);
+        CASC_FREE(ptr);
     }
 }
 
